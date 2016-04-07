@@ -1,0 +1,6 @@
+```{r, warning = FALSE}
+library(ggplot2)
+library(caret)
+```
+
+## Summarize data
