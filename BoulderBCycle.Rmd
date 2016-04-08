@@ -4,3 +4,49 @@ library(caret)
 ```
 
 ## Summarize data
+```{r, warning = FALSE}
+# Load the dataset 
+dataset <- read.csv("Boulder Data.csv", header = TRUE)
+
+# Load the location data
+locationset <- read.csv("Boulder Location.csv", header = TRUE)
+
+# Peak into the data
+head(dataset)
+
+# Convert from character string into a time/date object
+dataset$Checkout.Date <- strptime(dataset$Checkout.Date, "%m/%d/%Y")
+dataset$Checkout.Date <- format(dataset$Checkout.Date, "%m/%d/%Y")
+
+# Convert from character string into a time/date object
+dataset$Checkout.Time <- strptime(dataset$Checkout.Time, "%I:%M:%S %p")
+dataset$Checkout.Time <- format(dataset$Checkout.Time, "%H:%M:%S")
+
+# Get the summary of the data
+summary(dataset)
+
+# View the subset of the data
+subset <- subset(dataset, dataset$Rider.Home.System == "Denver B-cycle")
+```
+
+From the summary it is clear that there are some errors in the "Rider.Home.System" column.
+This is supposed to be data from Boulder, so there are some errors in terms of the home system.
+Subsetting the data and then glancing at the Checkout station and Return station, it is clear
+that the stations are correct and the home system is wrong. Not a big deal though because this 
+variable/column data is probably not that important
+
+## Visualize data
+```{r, warning = FALSE}
+# Bar plot of the post popular pass type
+riders <- subset(dataset, 
+                 Rider.or.Operator.Number%in%levels(dataset$Rider.or.Operator.Number)
+                 [table(dataset$Rider.or.Operator.Number) >= 300])
+
+ggplot(riders, aes(Rider.or.Operator.Number)) + geom_bar() + 
+  facet_wrap(~Entry.Pass.Type, ncol = 1) + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# Bar plot of the post popular pass type
+ggplot(dataset, aes(Entry.Pass.Type)) + geom_bar()
+```
+
