@@ -1,0 +1,133 @@
+```{r, warning = FALSE}
+library(ggplot2)
+library(caret)
+```
+
+## Summarize data
+```{r, warning = FALSE}
+# Load the dataset 
+dataset <- read.csv("Boulder Data.csv", header = TRUE)
+
+# Load the location data
+locationset <- read.csv("Boulder Location.csv", header = TRUE)
+
+# Peak into the data
+head(dataset)
+
+# Convert from character string into a time/date object
+dataset$Checkout.Date <- strptime(dataset$Checkout.Date, "%m/%d/%Y")
+dataset$Checkout.Date <- format(dataset$Checkout.Date, "%m/%d/%Y")
+
+# Convert from character string into a time/date object
+dataset$Checkout.Time <- strptime(dataset$Checkout.Time, "%I:%M:%S %p")
+dataset$Checkout.Time <- format(dataset$Checkout.Time, "%H:%M:%S")
+
+# Convert the Day of the Week into an ordered variable
+dataset$Checkout.Day.of.Week <- ordered(dataset$Checkout.Day.of.Week, 
+                                        levels = c("Sunday", "Monday", "Tuesday", 
+                                                   "Wednesday", "Thursday", "Friday",
+                                                   "Saturday"))
+  
+# Get the summary of the data
+summary(dataset)
+
+# View the subset of the data
+subset <- subset(dataset, dataset$Rider.Home.System == "Denver B-cycle")
+```
+
+From the summary it is clear that there are some errors in the "Rider.Home.System" column.
+This is supposed to be data from Boulder, so there are some errors in terms of the home system.
+Subsetting the data and then glancing at the Checkout station and Return station, it is clear
+that the stations are correct and the home system is wrong. Not a big deal though because this 
+variable/column data is probably not that important
+
+## Visualize data
+```{r, warning = FALSE}
+# Bar plot of riders with more than 200 rides
+riders <- subset(dataset, 
+                 Rider.or.Operator.Number %in% levels(dataset$Rider.or.Operator.Number)
+                 [table(dataset$Rider.or.Operator.Number) >= 200])
+
+ggplot(riders, aes(Rider.or.Operator.Number)) + geom_bar() + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(breaks = seq(0, 10000, by = 500))
+
+# Facet it with the Pass type
+ggplot(riders, aes(Rider.or.Operator.Number)) + geom_bar(aes(fill = Entry.Pass.Type)) + 
+  facet_wrap(~Entry.Pass.Type, ncol = 1, scales = "free_y") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
+  guides(fill = FALSE)
+
+# Bar plot of the post popular pass type
+ggplot(dataset, aes(Entry.Pass.Type)) + geom_bar(aes(fill = Entry.Pass.Type)) + 
+  scale_y_continuous(breaks = seq(0, 120000, by = 2500))
+```
+1. From the plots above, it is clear that the Anuual pass is definitely the most popular, followed by
+the 24-hour type of rental. The 150-day and 7-day pass pale in comparison. Maintainance is another one
+which has relatively high use compared to 7-day and Semester(150-day) type. This might be a good visualization for the company to use to probably change the strategy with respect to these kind of passes. 
+
+2. Looking at riders with more than 200 rides, some riders really like to use the B-cycle for their rides. Faceting it by the pass type, we get a better understanding of what type of passes they like to use. Annual is the biggest winner among people who use the bikes often(not surprising) but there was a rider who did a little more than 200 rides using the 24 hour pass(surprised that the person didn't think of other cheaper options). 
+
+3. The number of rides by riders using Maintenance pass is very interesting, there are a lot of rides
+by a few users. This indicates that these are operators who regularly use and fix the bikes.
+```{r, warning = FALSE}
+# Bar Plot of the bike numbers faceted by pass type
+bikes <- subset(dataset, 
+                Bike.Number %in% levels(dataset$Bike.Number)
+                [table(dataset$Bike.Number) >= 100])
+
+ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Entry.Pass.Type)) + 
+  theme(axis.text.x = element_text(angle = 90, face = "bold", size = 6)) +
+  facet_wrap(~Entry.Pass.Type, ncol = 1, scales = "free_y") +
+  guides(fill = FALSE)
+
+# Bar Plot of the bike numbers faceted by day of the week
+ggplot(dataset, aes(Bike.Number)) + geom_bar(aes(fill = Checkout.Day.of.Week)) + 
+  theme(axis.text.x = element_text(angle = 90, face = "bold", size = 6)) +
+  facet_wrap(~Checkout.Day.of.Week, ncol = 1, scales = "free_y") +
+  guides(fill = FALSE)
+```
+Was not expecting any trends in the plot above but surprisingly there is a trend(for all pass types except for Semester type), the bike numbers in the middle(even though the text is hard to read) are the most used in all modes. They are very likely tied to the most popular stations in Boulder. 
+```{r, warning = FALSE}
+# Bar plot of the day of the week
+ggplot(dataset, aes(Checkout.Day.of.Week)) + geom_bar() +
+  guides(fill = FALSE)
+
+# Facet by pass type
+ggplot(dataset, aes(Checkout.Day.of.Week)) + geom_bar(aes(fill = Entry.Pass.Type)) +
+  facet_wrap(~Entry.Pass.Type, ncol = 1, scales = "free_y") + 
+  guides(fill = FALSE)
+```
+1. Friday is overall the most popular day of the week for ridership, followed by Thursday(surprising) and then Saturday. Monday, Tuesday & Wednesday usage is very close and Sunday usage is markedly lower compared to other days
+
+2. When looking at the data faceted by the pass type, Annual pass holders like to use their passes on weekdays(the distribution is almost gaussian like). It is completely opposite for the users of 24-hour pass type, they like riding on weekends. Maintenance rides seems to happen mostly on weekends. Semester pass holders like to use the pass on the weekdays with Tuesday seeing the most rides. In the case of the 7-day pass there is no visible trend but Thursday is when the most rides happen with 7-day pass holders, followed by Friday and Sunday. 
+```{r, warning = FALSE}
+# Get a summary of Trip Duration 
+summary(dataset$Trip.Duration..Minutes.)
+boxplot(dataset[, 13], main = names(dataset)[13])
+
+# Remove the negative values and convert it into positive 
+# and also remove outliers(by playing around with the box plot)
+duration <- subset(dataset, 
+                   dataset$Trip.Duration..Minutes. > 0 & 
+                   !is.na(dataset$Trip.Duration..Minutes.) &
+                   dataset$Trip.Duration..Minutes. < 40 )
+
+# The box plot looks much better after removing the outliers
+boxplot(dataset[, 13], main = names(dataset)[13])
+
+# Histogram after some cleaning(remove very high values, seem like errors)
+ggplot(duration, aes(Trip.Duration..Minutes.)) + geom_histogram(color = "white", bins = 40) 
+
+# Faceted by pass type
+ggplot(duration, aes(Trip.Duration..Minutes.)) + 
+  geom_histogram(color = "white", aes(fill = Entry.Pass.Type), bins = 40) +
+  facet_grid(~Entry.Pass.Type) +
+  guides(fill = FALSE)
+
+# Faceted by day of the week and pass type
+ggplot(duration, aes(Trip.Duration..Minutes.)) + 
+  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 40) +
+  facet_grid(Entry.Pass.Type~Checkout.Day.of.Week, scales = "free_y") +
+  guides(fill = FALSE)
+```
