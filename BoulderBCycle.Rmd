@@ -125,9 +125,23 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
   facet_grid(~Entry.Pass.Type) +
   guides(fill = FALSE)
 
+
+# Faceted by day of the week
+ggplot(duration, aes(Trip.Duration..Minutes.)) + 
+  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 40) +
+  facet_grid(~Checkout.Day.of.Week) +
+  guides(fill = FALSE)
+
 # Faceted by day of the week and pass type
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
   geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 40) +
   facet_grid(Entry.Pass.Type~Checkout.Day.of.Week, scales = "free_y") +
   guides(fill = FALSE)
 ```
+1. Overall, the trip duration is a gaussian distribution with the max at 5 minutes and fall is pretty slow and not dramatic till we hit the 40 minute mark. 
+
+2. Faceting it by pass type, for the 24 hour pass type, the most common trip duration is 12 minutes, 10-11 minutes for 7-day pass, 5 minutes for Annual, 1 minute for Maintenance(quick maintenance!) and 7 minutes for semester type.
+
+3. When looking at the plots by the day of the week, 5 minute period still is the most popular on weekdays but not on weekends. With 1 minute and 8-9 minutes seeming to be more common, may be this is due to the fact that people are not in a hurry on weekends?
+
+4. Combining the pass type and weekday, the annual pass holders trip duration pattern doesn't change much except for a slight shift in the most popular duration on Saturdays to the 7 minute mark(again may be people are more relaxed about reaching to places). 24 hour pass type trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass doesn't show a clear pattern and difficult to gauge from the plots. 1-minute maintenance seems to be the most common over weekdays and Saturdays but not necessarily on Sunday. 7-8 minutes trip duration seems to still be the most common for semester type pass. 
