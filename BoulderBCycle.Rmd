@@ -209,7 +209,7 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
   facet_wrap(~Return.Station, ncol = 5) +
   guides(fill = FALSE)
 ```
-No surprising changes from the Return Station analysis, most if not all of the points from the pervious section apply here as well
+No surprising changes from the Return Station analysis, most if not all of the points from the pervious section apply here as well. 
 ```{r, warning = FALSE}
 # Plot histogram of checkout 
 ggplot(dataset, aes(Checkout.Date)) + 
