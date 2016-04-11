@@ -223,11 +223,19 @@ ggplot(dataset, aes(Checkout.Date)) +
   facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") + 
   scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "3 months") + 
   guides(fill = FALSE)
+```
+1. The number of checkouts has progressively increased over the years from year to year. There is definitly a pattern in terms of usage with summer(May-August) months seeing an increase in checkouts but a dip on on either side. This definitely makes sense as people tend to ride less in the winter months. Among the popular summer months, July-August have the biggest checkouts across the years
 
+2. Viewing the plots by the type of the pass, we can see that all pass types have seen an increase in usage. 7-day pass saw a big increase in the summer of 2015 and the semester type pass also saw a big increase since it was introduced in early 2014. 
+
+3. Among the annual pass holders, October of 2015 had more users than any other month in the warmer months. This is surprising, I guess October must have been warm and also some events in the Boulder area must have caused increase ridership in a relatively colder month. 
+
+4. Maintenance generally follows the trend of increase in number of instances of maintenance in the summer months and a decrease in the colder months. One anamoly was that in April of 2015 had the highest instances of maintenance for that year and it wasn't overall the highest month in terms of ridership. This might indicate that the Boulder B-cycle organization might be tuning up the bikes to prepare for the popular ridership months. It might be a good guess because the maintenance was lower in the months following April for 2015 across pass types.
+```{r, warning = FALSE}
 # Facet it by day of the week
 ggplot(dataset, aes(Checkout.Date)) + 
   geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
-  facet_wrap(~Checkout.Day.of.Week, color = "white",ncol = 1, scale = "free_y") + 
+  facet_wrap(~Checkout.Day.of.Week, ncol = 1, scale = "free_y") + 
   scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "6 months") + 
   guides(fill = FALSE)
 
@@ -235,14 +243,84 @@ ggplot(dataset, aes(Checkout.Date)) +
 ggplot(dataset, aes(Checkout.Date)) + 
   geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
   facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scale = "free_y") + 
-  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "3 months") + 
+  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "4 months") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE)
 ```
-1. The number of checkouts has progressively increased over the years from year to year. There is definitly a pattern in terms of usage with summer(May-August) seeing an increase in checkouts but seeing a fall on either side. This definitely makes sense as people tend to ride less in the winter months
+1. Analysing checkouts divided by the day of the week. Only Tue-Wed deviate from the general trend that August is the most popular month followed by July. In the case of Tue-Wed the roles get reversed. 
+
+2. Doing a multivariate analysis we can see finer trends in popular days across months and across pass types. 
 ```{r, warning = FALSE}
-# Plot bar plot of checkout 
+# Bar plot of checkout time 
 ggplot(dataset, aes(Checkout.Time)) + 
-  geom_histogram(color = "white") +
-  scale_x_datetime(date_labels = "%H:%M:%S", date_breaks = "1 hour") + 
+  geom_histogram(color = "white", bins = 50) +
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
   guides(fill = FALSE)
+
+# Bar plot of return time
+ggplot(dataset, aes(Return.Time)) + 
+  geom_histogram(color = "white", bins = 50) +
+  facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") +
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  guides(fill = FALSE)
+
+# Bar plot of checkout time faceted by pass type 
+ggplot(dataset, aes(Checkout.Time)) + 
+  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 50) +
+  facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") +
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  guides(fill = FALSE)
+
+# Bar plot of return time faceted by pass type 
+ggplot(dataset, aes(Return.Time)) + 
+  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 50) +
+  facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") +
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  guides(fill = FALSE)
+
+# Facet by pass type and day of the week
+ggplot(dataset, aes(Checkout.Time)) + 
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scale = "free_y") + 
+  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "4 months") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
+  guides(fill = FALSE)
+
+ggplot(dataset, aes(Return.Time)) + 
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scale = "free_y") + 
+  scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "4 months") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
+  guides(fill = FALSE)
+```
+1. Checkout/Return times start slowly a little before 7(expected), with a big increase just after 7:00. From then on the trend is that returns slightly decrease from 7 then increase from 10:00 to 11:15, then seeing a dip at around 13:00 followed by an increase till 15:00. There is a dip again with an increase in ridership after 18:00. The return and checkout times follow each other closely because the overall most popular times in Boulder is less than 10 minutes.
+
+2. 24 hour pass type holders checkout/return times start off strong in the morning and slowly decrease except for one small spike at 10:00 and then start increasing at 2:30, hitting a peak at 18:00 and then slowly decreasing.
+
+3. Among 7-day pass holders 14:30 seems to be the peak for checkout/returns. The increase in checkout/return starts at around 11:30. The pattern seems to be similar for semester pass holders. 
+
+4. Annual pass holder pattern follows the overall pattern described in point 1. The peak maintenance times is in the morning before 11:00 followed by a big dip and then a big increase after 15:00  
+
+```{r, warning =  FALSE}
+# Facet by pass type and day of the week
+ggplot(dataset, aes(Checkout.Time)) + 
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scale = "free_y") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "2 hour") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
+  guides(fill = FALSE)
+
+ggplot(dataset, aes(Return.Time)) + 
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scale = "free_y") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "2 hour") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
+  guides(fill = FALSE)
+```
+1. Among 24 hour pass holders Tue-Thu checkout/return pattern is different from Fri-Mon. Tue-Thu checkout/returns doesn't dip as much in the middle of the day compared to Fri-Mon.
+
+2. 7-day pass holders checkout/returns peak at around 15:00 from Mon-Thu, with Fri-Sun seeing peaks and drops throughout the day. The same pattern applies for semester pass holders. 
+
+3. Annual pass holders like to use the service in 11:00, 15:00 and 18:00 time periods on weekdays. Where as on Saturdays and Sundays see peak usage in the morning and evenings
+
+4. Maintenance peaks at 15:00 on weekdays and mornings and evenings on Saturdays and Sunday. There is a big drop in maintenance in the middle of the day of the weekend days. 
