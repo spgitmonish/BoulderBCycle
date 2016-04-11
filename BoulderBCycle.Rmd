@@ -1,12 +1,19 @@
 ```{r, warning = FALSE}
 library(ggplot2)
 library(caret)
+library(ggmap)
 ```
 
 ## Summarize data
 ```{r, warning = FALSE}
 # Load the dataset 
 dataset <- read.csv("Boulder Data.csv", header = TRUE)
+
+# It looks like RTD and 14th and Canyon are supposed to mean the same location, so 
+# search and replace. This is okay because our analysis about stations doesn't change
+# as 14th and Canyon/RTD wasn't the top of the pile
+# NOTE: This was added as analysis was done below in the Station section
+dataset <- as.data.frame(sapply(dataset, function(x) gsub("RTD", "14th & Canyon", x)))
 
 # Load the location data
 locationset <- read.csv("Boulder Location.csv", header = TRUE)
@@ -317,10 +324,55 @@ ggplot(dataset, aes(Return.Time)) +
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE)
 ```
-1. Among 24 hour pass holders Tue-Thu checkout/return pattern is different from Fri-Mon. Tue-Thu checkout/returns doesn't dip as much in the middle of the day compared to Fri-Mon.
+1. Among 24 hour pass holders from Tue-Thu the checkout/return pattern is different from Fri-Mon. Tue-Thu checkout/returns doesn't dip as much in the middle of the day compared to Fri-Mon.
 
-2. 7-day pass holders checkout/returns peak at around 15:00 from Mon-Thu, with Fri-Sun seeing peaks and drops throughout the day. The same pattern applies for semester pass holders. 
+2. 7-day pass checkout/returns peak at around 15:00 from Mon-Thu, with Fri-Sun seeing peaks and drops throughout the day. The same pattern applies for semester pass holders. 
 
 3. Annual pass holders like to use the service in 11:00, 15:00 and 18:00 time periods on weekdays. Where as on Saturdays and Sundays see peak usage in the morning and evenings
 
-4. Maintenance peaks at 15:00 on weekdays and mornings and evenings on Saturdays and Sunday. There is a big drop in maintenance in the middle of the day of the weekend days. 
+4. Maintenance peaks at 15:00 on weekdays but mornings and evenings on Saturdays and Sunday. There is a big drop in maintenance in the middle of weekends. 
+```{r, warning = FALSE}
+# Get the map of Boulder, CO
+map = get_map(location = "Boulder, Colorado", zoom = 13, maptype = "terrain")
+
+# Convert the location access count into a table
+checkoutcount <- as.data.frame(table(dataset$Checkout.Station))
+returncount <- as.data.frame(table(dataset$Return.Station))
+
+# Add a new column for checkout count and return count
+locationset["Checkout.Count"] <- NA
+locationset["Return.Count"] <- NA
+
+# Go through each element of the locationcount data frame and add the count
+# corresponding to the location
+for (i in 1:nrow(checkoutcount)){
+  indextoadd <- grep(checkoutcount[i, "Var1"], locationset$Checkout.Station)
+  locationset[indextoadd, "Checkout.Count"] <- checkoutcount[i, "Freq"]
+}
+
+for (i in 1:nrow(returncount)){
+  indextoadd <- grep(returncount[i, "Var1"], locationset$Return.Station)
+  locationset[indextoadd, "Return.Count"] <- returncount[i, "Freq"]
+}
+
+# Pass in the map object for plotting a heat map of the checkout stations
+ggmap(map) +
+  geom_point(data = locationset, 
+             aes(y = Checkout.Station.Latitude, 
+                 x = Checkout.Station.Longitude,
+                 size = Checkout.Count),
+             color = "red", alpha = 0.5) +
+  scale_size(range = c(0, 15)) + 
+  guides(fill = FALSE)
+
+# Heat map of the return stations
+ggmap(map) +
+  geom_point(data = locationset, 
+             aes(y = Checkout.Station.Latitude, 
+                 x = Checkout.Station.Longitude,
+                 size = Return.Count),
+             color = "red", alpha = 0.5) +
+  scale_size(range = c(0, 15)) + 
+  guides(fill = FALSE)
+```
+The maps above show what the most popular checkout/return stations are in Boulder. The size of the circle represents the overall checkouts/returns since B-cycle started.
