@@ -13,7 +13,10 @@ dataset <- read.csv("Boulder Data.csv", header = TRUE)
 # search and replace. This is okay because our analysis about stations doesn't change
 # as 14th and Canyon/RTD wasn't the top of the pile
 # NOTE: This was added as analysis was done below in the Station section
-dataset <- as.data.frame(sapply(dataset, function(x) gsub("RTD", "14th & Canyon", x)))
+dataset$Checkout.Station <- sapply(dataset$Checkout.Station, 
+                                                 function(x) gsub("RTD", "14th & Canyon", x))
+dataset$Return.Station <- sapply(dataset$Return.Station, 
+                                                 function(x) gsub("RTD", "14th & Canyon", x))
 
 # Load the location data
 locationset <- read.csv("Boulder Location.csv", header = TRUE)
@@ -58,13 +61,15 @@ ggplot(riders, aes(Rider.or.Operator.Number)) + geom_bar() +
   scale_y_continuous(breaks = seq(0, 10000, by = 500))
 
 # Facet it with the Pass type
-ggplot(riders, aes(Rider.or.Operator.Number)) + geom_bar(aes(fill = Entry.Pass.Type)) + 
+ggplot(riders, aes(Rider.or.Operator.Number)) + 
+  geom_bar(aes(fill = Entry.Pass.Type)) + 
   facet_wrap(~Entry.Pass.Type, ncol = 1, scales = "free_y") + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + 
   guides(fill = FALSE)
 
 # Bar plot of the post popular pass type
-ggplot(dataset, aes(Entry.Pass.Type)) + geom_bar(aes(fill = Entry.Pass.Type)) + 
+ggplot(dataset, aes(Entry.Pass.Type)) + 
+  geom_bar(aes(fill = Entry.Pass.Type)) + 
   scale_y_continuous(breaks = seq(0, 120000, by = 2500))
 ```
 1. Looking at riders with more than 200 rides, some riders really like to use the B-cycle for their rides. Faceting it by the pass type, we get a better understanding of what type of passes they like to use. Annual is the biggest winner among people who use the bikes often(not surprising) but there was a rider who did a little more than 200 rides using the 24 hour pass(surprised that the person didn't think of other cheaper options). 
@@ -116,39 +121,47 @@ boxplot(dataset[, 13], main = names(dataset)[13])
 duration <- subset(dataset, 
                    dataset$Trip.Duration..Minutes. > 0 & 
                    !is.na(dataset$Trip.Duration..Minutes.) &
-                   dataset$Trip.Duration..Minutes. < 40 )
+                   dataset$Trip.Duration..Minutes. < 60 )
 
 # The box plot looks much better after removing the outliers
-boxplot(dataset[, 13], main = names(dataset)[13])
+boxplot(duration[, 13], main = names(dataset)[13])
 
 # Histogram after some cleaning(remove very high values, seem like errors)
-ggplot(duration, aes(Trip.Duration..Minutes.)) + geom_histogram(color = "white", bins = 40) 
+ggplot(duration, aes(Trip.Duration..Minutes.)) + 
+  geom_histogram(color = "white", bins = 30) +
+  scale_x_continuous(breaks = seq(0, 60, 2))
 
 # Faceted by pass type
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Entry.Pass.Type), bins = 40) +
+  geom_histogram(color = "white", aes(fill = Entry.Pass.Type), bins = 30) +
+  scale_x_continuous(breaks = seq(0, 60, 2)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
   facet_grid(~Entry.Pass.Type) +
   guides(fill = FALSE)
 
 # Faceted by day of the week
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 40) +
+  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 30) +
+  scale_x_continuous(breaks = seq(0, 60, 2)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
   facet_grid(~Checkout.Day.of.Week) +
   guides(fill = FALSE)
 
 # Faceted by day of the week and pass type
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 40) +
+  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 30) +
+  scale_x_continuous(breaks = seq(0, 60, 2)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
   facet_grid(Entry.Pass.Type~Checkout.Day.of.Week, scales = "free_y") +
   guides(fill = FALSE)
 ```
-1. Overall, the trip duration is a gaussian distribution with the max at 5 minutes and fall is pretty slow and not dramatic till we hit the 40 minute mark. 
+1. Overall, the trip duration is a gaussian distribution with the max at 4-5 minutes and falls pretty hard and kind of stabilizes from the 32 minute mark. 
 
-2. Faceting it by pass type, for the 24 hour pass type, the most common trip duration is 12 minutes, 10-11 minutes for 7-day pass, 5 minutes for Annual, 1 minute for Maintenance(quick maintenance!) and 7 minutes for semester type.
+2. Faceting it by pass type, for the 24 hour pass type, the most common trip duration is 12-13 minutes, 10-13 minutes for 7-day pass, 4-5 minutes for Annual, 1 minute for Maintenance(quick maintenance!) and 6-7 minutes for semester type.
 
-3. When looking at the plots by the day of the week, 5 minute period still is the most popular on weekdays but not on weekends. With 1 minute and 8-9 minutes seeming to be more common, may be this is due to the fact that people are not in a hurry on weekends?
+3. When looking at the plots by the day of the week, 5 minute period still is the most popular on weekdays but not on weekends. With 10-12 minute seeming to be more popular, may be this is due to the fact that people are not in a hurry on weekends?
 
-4. Combining the pass type and weekday, the annual pass holders trip duration pattern doesn't change much except for a slight shift in the most popular duration on Saturdays to the 7 minute mark(again may be people are more relaxed about reaching to places). 24 hour pass type trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass doesn't show a clear pattern and difficult to gauge from the plots. 1-minute maintenance seems to be the most common over weekdays and Saturdays but not necessarily on Sunday. 7-8 minutes trip duration seems to still be the most common for semester type pass. 
+4. Combining the pass type and weekday, the annual pass holders trip duration pattern doesn't change much except and point 3 still holds true. 24 hour pass type trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass doesn't show a clear pattern and difficult to gauge from the plots. 1-minute maintenance seems to be the most common turn around time. 7-8 minutes trip duration seems to still be the most common for semester type pass.
 ```{r, warning = FALSE}
 # Bar plot of the checkout station
 ggplot(dataset, aes(Checkout.Station)) + 
@@ -172,8 +185,16 @@ ggplot(dataset, aes(Checkout.Station)) +
 
 # Facet Trip duration by checkout station
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Checkout.Station), bins = 40) +
+  geom_histogram(color = "white", aes(fill = Checkout.Station), bins = 30) +
+  scale_x_continuous(breaks = seq(0, 60, 2)) + 
   facet_wrap(~Checkout.Station, ncol = 5) +
+  guides(fill = FALSE)
+
+# Facet Trip duration by checkout station
+ggplot(duration, aes(Trip.Duration..Minutes.)) + 
+  geom_histogram(color = "white", aes(fill = Return.Station), bins = 30) +
+  scale_x_continuous(breaks = seq(0, 60, 2)) + 
+  facet_wrap(~Return.Station, ncol = 5) +
   guides(fill = FALSE)
 ```
 1. 15th & Pearl, 13th and Spruce are the 2 most poular check out stations in Boulder. There is a close tie between 11th and Pearl and Municipal Building stations. Greenhouse and Gunbarrel North are the least used stations, 14th and Walnut office might be an error as this location doesn't have lattitude, longitude listed
@@ -188,7 +209,7 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
 
 6. 11th & Pearl is the most popular checkout station for the semester type pass with 15th & Pearl, 19th @ Broadway, 28th & Boulder Creek and Broadway & Euclid having checkout numbers which are close to each other. 
 
-7. Faceting the trip duration by Checkout station there are not any major surprises and the overall pattern across the popular stations seems to be still true, ride times being under 10 minutes.
+7. Faceting the trip duration by Checkout station there are not any major surprises and the overall pattern across the popular stations seems to be still true, ride times being in the 6-10 minutes range
 ```{r, warning = FALSE}
 # Bar plot of the return station
 ggplot(dataset, aes(Return.Station)) + 
@@ -376,3 +397,40 @@ ggmap(map) +
   guides(fill = FALSE)
 ```
 The maps above show what the most popular checkout/return stations are in Boulder. The size of the circle represents the overall checkouts/returns since B-cycle started.
+
+# Machine Learning to predict the pass type
+```{r, warning = FALSE}
+# Subset the data keeping the necessary variables
+mlsubset <- dataset[c(3, 13)]
+
+# Create partition
+trainIndex <- createDataPartition(mlsubset$Entry.Pass.Type, p = 0.8, list = FALSE, times = 1)
+trainingset <- mlsubset[trainIndex, ]
+testset <- mlsubset[-trainIndex, ]
+
+# Get the necessary variables for analysis
+# Split the data set for 10-fold cross validation, train on 9, test on 1 for all combinations
+trainControl <- trainControl(method = "cv", number = 10)
+metric <- "Accuracy"
+
+# Evaluate 3 different algorithms, make sure the same seed is used
+# Linear Discriminant Analysis
+set.seed(7)
+fit.lda <- train(Entry.Pass.Type~., data = trainingset, method = "lda", 
+                 metric = metric, trControl = trainControl)
+# Classification and Regression Test
+set.seed(7)
+fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart", 
+                  metric = metric, trControl = trainControl)
+# Naive Bayes
+set.seed(7)
+fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
+                 metric = metric, trControl = trainControl)
+
+# Summarize accuracy of models
+results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb))
+summary(results)
+
+# Dot plot of the results
+dotplot(results)
+```
