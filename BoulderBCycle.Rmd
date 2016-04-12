@@ -426,15 +426,15 @@ fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart",
 set.seed(7)
 fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
                  metric = metric, trControl = trainControl)
-# kNN
-set.seed(7)
-fit.knn <- train(Entry.Pass.Type~., data = trainingset, method = "knn", 
-                 preProcess = c("center", "scale"), metric = metric, trControl = trainControl)
 
 # Summarize accuracy of models
-results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb, knn = fit.knn))
+results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb))
 summary(results)
 
 # Dot plot of the results
 dotplot(results)
+
+# Compare against the test set
+predictions <- predict(fit.cart, testset)
+confusionMatrix(predictions, testset$Entry.Pass.Type)
 ```
