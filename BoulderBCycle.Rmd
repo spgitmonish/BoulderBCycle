@@ -1,11 +1,27 @@
-```{r, warning = FALSE}
-library(ggplot2)
-library(caret)
-library(ggmap)
+---
+title: "Boulder B-Cycle data analysis by Monish Sunku Prabhakar"
+output:
+  html_document:
+    toc: true
+    theme: united
+---
+# __Introduction__
+This project analyses Boulder B-cycle data to understand rider patterns from 2013 to Early 2016. The analysis is divided into sections where under each section a different aspect of the data set is explored. The following questions give an overview of the data set.
+
+### What is the structure of your dataset?
+There are 248544 observations of 13 variables. The variables include Checkout/Return Stations, Checkout/Return Time, Type of Pass, Day of the Week, Trip Duration, Bike Number and Rider/Operator number. Also included is a location dataset with latitude and longitude information along with other information about the Checkout/Return station
+
+### How is the analysis divided?
+The analysis is divided into Summary of Data, Exploring Data through visualizations(univariate and multivariate analysis) and usage of ML to try and predict pass type
+
+```{r, {r, echo = FALSE, message = FALSE, warning = FALSE, packages}
+suppressMessages(library(ggplot2))
+suppressMessages(library(caret))
+suppressMessages(library(ggmap))
 ```
 
-## Summarize data
-```{r, warning = FALSE}
+# __Summary of Data
+```{r, warning = FALSE, echo = FALSE}
 # Load the dataset 
 dataset <- read.csv("Boulder Data.csv", header = TRUE)
 
@@ -47,10 +63,12 @@ From the summary it is clear that there are some errors in the "Rider.Home.Syste
 This is supposed to be data from Boulder, so there are some errors in terms of the home system.
 Subsetting the data and then glancing at the Checkout station and Return station, it is clear
 that the stations are correct and the home system is wrong. Not a big deal though because this 
-variable/column data is probably not that important
+variable/column data is probably not that important.
 
-## Visualize data
-```{r, warning = FALSE}
+The above section also corrects error in values, "RTD" and "14th & Canyon" probably mean the same station and that is handled in the summary section.
+
+# __Visualize riders data with pass type
+```{r, warning = FALSE, echo = FALSE}
 # Bar plot of riders with more than 200 rides
 riders <- subset(dataset, 
                  Rider.or.Operator.Number %in% levels(dataset$Rider.or.Operator.Number)
