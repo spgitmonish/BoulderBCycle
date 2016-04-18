@@ -63,9 +63,9 @@ dataset$Checkout.Day.of.Week <- ordered(dataset$Checkout.Day.of.Week,
 There are 248544 observations of 13 variables. The variables include Checkout/Return Stations, Checkout/Return Time, Type of Pass, Day of the Week, Trip Duration, Bike Number and Rider/Operator number. Also included is a location dataset with latitude and longitude information along with other information about the Checkout/Return stations
 
 ### Corrections to the dataset
-There are some errors in the "Rider.Home.System" column. This data is supposed to be data for Boulder but the home system was set to Denver and Houston, this is not correct. This is not a big deal though because this variable/column data is probably not that important in my analysis because it's a constant. 
+There are some errors in the "Rider.Home.System" column. This data is supposed for Boulder but was set to Denver and Houston in some cases, this is not correct. This is not a big deal because this variable/column data is probably not that important in the analysis because it's a constant and doesn't add value to the analysis.  
 
-NOTE: I also made corrections to Checkout/Return Station "RTD", which is really "14th & Canyon" but entered incorrectly as RTD. I found this error later in my project as I did my analysis but I corrected it early on. 
+NOTE:  I also made corrections to Checkout/Return Station "RTD", which is really "14th & Canyon" but entered incorrectly as RTD.  I found this error later in my project as I did my analysis but I corrected it early on. 
 
 # __2. Data Visualizations__
 This section involves a lot of visualizations. It's a combination of univariate and multivariate plots, with focus on one variable at a time.
@@ -95,9 +95,9 @@ ggplot(riders, aes(Rider.or.Operator.Number)) +
   ylab("Count")
 ```
 
-NOTE: There were a lot of riders between 1-200 rides and to understand any patterns better, the data was subset to riders with 200 or more rides.
+NOTE: There were a lot of riders with 1-200 rides, so to understand any patterns better, the data was subset to riders with 200 or more rides.
 
-The following trends with using a subset of the data can be noted. 
+The following trends can be noted when using the subset: 
 
 1. Some riders really like to use the B-cycle for their rides. Faceting it by the pass type, we get a better understanding of what type of passes they like to use. Annual Pass is the biggest winner among people who use the bikes often(not surprising) but there was a rider who did a little more than 200 rides using the 24 hour pass(surprised that the person didn't think of other cheaper options). 
 
