@@ -17,6 +17,8 @@ The analysis is divided into 3 big sections:
 
 3. Machine Learning to predict the Pass Type 
 
+4. Conclusion
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10}
 suppressMessages(library(ggplot2))
 suppressMessages(library(caret))
@@ -65,7 +67,7 @@ There are 248544 observations of 13 variables. The variables include Checkout/Re
 ### Corrections to the dataset
 There are some errors in the "Rider.Home.System" column. This data is supposed for Boulder but was set to Denver and Houston in some cases, this is not correct. Not a big issue because this variable/column data is not that important in the analysis because it's a constant and doesn't add value to the analysis.  
 
-NOTE: I also made corrections to Checkout/Return Station "RTD", which is really "14th & Canyon" but was entered incorrectly as "RTD". I found this error later on in the project analysis but I corrected it early on. 
+NOTE: corrections were made to Checkout/Return Station "RTD", which is really "14th & Canyon" but was entered incorrectly as "RTD". This error was found later on in the project analysis but was corrected early on. 
 
 # __2. Data Visualizations__
 This section involves a lot of visualizations. It's a combination of univariate and multivariate plots, with the focus on one variable at a time.
@@ -97,12 +99,11 @@ ggplot(riders, aes(Rider.or.Operator.Number)) +
 
 NOTE: There were a lot of riders with 1-200 rides, so to understand any patterns better, the data was subset to riders with 200 or more rides.
 
-The following trends can be noted from the plots in this section when using the subset: 
+The following trends can be noted from the plots in this section from the subset data: 
 
-1. Some riders really like to use the B-cycle for their rides(Fig1). Faceting it by the pass type(Fig2), we get a better understanding of what type of passes they like to use. Annual Pass is the biggest winner among people who use the bikes often(not surprising) but there was a rider who did a little more than 200 rides using the 24 hour pass(surprised that the person didn't think of other cheaper options). 
+1. Some riders really like to use B-cycle for their rides(Fig1). Faceting it by the pass type(Fig2), we get a better understanding of what type of passes they like to use. Annual Pass is the biggest winner among people who use the bikes often(not surprising) but there was a rider who did a little more than 200 rides using the 24 hour pass(surprised that the person didn't think of other available pass types). 
 
-2. The number of rides by riders using Maintenance pass is very interesting, there are a lot of rides by a few users. This indicates that these were operators who regularly used and fixed the
-bikes.
+2. The number of rides by riders using Maintenance pass is very interesting, there are a lot of rides by a few users. This indicates that these were operators who regularly used and fixed bikes.
 
 ### Pass Type
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig3: Pass Type Count", fig.align = "center"}
@@ -128,7 +129,7 @@ ggplot(dataset, aes(Entry.Pass.Type)) +
 
 1. There are 4 pass types as noted from the plot above(Fig3). It is clear that the Anuual pass is definitely the most popular, followed by the 24-hour type pass. 150-day and 7-day passes pale in comparison. Maintainance is another one which has relatively high use compared to 7-day and Semester(150-day) type.
 
-2. From Fig4 one thing which stands out is that 24-hour pass type is used way more than Annual pass on the weekends. whereas on the weekdays Annual pass is still the most widely used. Semester and 7-day pass usage is still very low.  
+2. From Fig4 one thing which stands out is that 24-hour pass type is used way more than Annual pass on the weekends. whereas on the weekdays Annual pass is still the most widely used. Semester and 7-day pass usage is comparatively very low.  
 
 ### Bike Numbers 
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig5: Bike# Count seperated by Pass Type", fig.align = "center"}
@@ -168,7 +169,7 @@ ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Checkout.Day.of.Week)) +
 
 Was not expecting any trends when analyzing bike numbers but surprisingly there are some trends.
 
-Except for 7-day and Semester pass types, the bike numbers in the middle seem to be most used. This might be related to the stations they are at, as there are stations which are more popular than other ones as we will see below. 
+Except for 7-day and Semester pass types, the bike numbers in the middle seem to be most used for other pass types. This might be related to the stations they are at, as there are stations which are more popular than others, as we will see below. 
 
 ### Day of the week
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig8: Day of the Week Count", fig.align = "center"}
@@ -188,13 +189,15 @@ ggplot(dataset, aes(Checkout.Day.of.Week)) + geom_bar(aes(fill = Entry.Pass.Type
   ylab("Count")
 ```
 
-1. Friday is overall the most popular day of the week for ridership, followed by Thursday(surprising) and then Saturday. Monday, Tuesday & Wednesday usage is very close, whereas Sunday usage is markedly lower compared to other days(Fig8)
+1. Friday overall is the most popular day of the week for ridership, followed by Thursday(surprising) and then Saturday. Monday, Tuesday & Wednesday usage is very close, whereas Sunday usage is markedly lower compared to other days(Fig8)
 
-2. When looking at the data faceted by the pass type(Fig9), Annual pass holders like to use their passes on weekdays(the distribution is almost gaussian like). It is completely opposite for the users of 24-hour pass type, they like riding on weekends(as we noted in the Pass Type section)
+2. When looking at the data faceted by the pass type(Fig9), Annual pass holders like to use their passes on weekdays(the distribution is almost gaussian like). It is completely opposite for the users of 24-hour pass type, they like riding on weekends(as it was noted in the Pass Type section)
 
-3. Maintenance rides seems to happen mostly on weekends. Semester pass holders like to use their pass on the weekdays with Tuesday being the most popular. 
+3. Maintenance rides are common on weekdays. 
 
-4. In the case of 7-day pass, there is no visible trend but Thursday is most popular followed by Friday & Saturday.
+4. Semester pass holders like to use their pass on the weekdays with Tuesday being the most popular. 
+
+5. In the case of 7-day pass, there is no visible trend but Thursday is most popular followed by Friday & Saturday.
 
 ### Trip Duration
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig10:Box plots of Trip Duration", fig.align = "center"}
@@ -257,17 +260,16 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
   xlab("Trip Duration") +
   ylab("Count")
 ```
-This section also uses a subset of the data. There were a lot of outliers in trip duration, so the trip duration to 60 minutes and the subset of the data was used for visualizations. 
 
-1. Overall(Fig11), the trip duration is a gaussian distribution with the peak at 4-5 minutes and falls pretty hard and kind of stabilizes from the 32 minute mark. 
+This section also uses a subset of the data. There were a lot of outliers in trip duration, so the trip duration was subset to rides within and including 60 minutes.
 
-2. Faceting it by pass type(Fig12), for the 24 hour pass type, the most common trip duration is 12-13 minutes, 10-13 minutes for 7-day pass, 4-5 minutes for Annual, 1 minute for Maintenance(quick maintenance!) and 6-7 minutes for semester type.
+1. Overall(Fig11), the trip duration is a gaussian distribution with the peak at 4-6 minutes and falls pretty hard and kind of stabilizes from the 32 minute mark. 
 
-3. When looking at the plots by the day of the week(Fig 13), 5ish minute period still is the most popular on weekdays but not on weekends. With 10-12 minute seeming to be more popular, may be this is due to the fact that people are not in a hurry on the weekends.
+2. Faceting it by pass type(Fig12), for the 24 hour pass type, the most common trip duration is 12-13 minutes, 10-13 minutes for 7-day pass, 4-6 minutes for Annual, 1 minute for Maintenance(quick maintenance rides!) and 6-8 minutes for semester type.
 
-4. Combining the pass type and weekday(Fig 14), annual pass holders trip duration pattern doesn't change much, point 3 still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 
+3. When looking at the plots by the day of the week(Fig 13), 4-6 minute period still is the most popular on weekdays but not on weekends. With 10-12 minute seeming to be more popular, may be this is due to the fact that people are not in a hurry on the weekends.
 
-5. 1-minute maintenance seems to be the most common turn around time. 7-8 minutes trip duration seems to still be the most common for semester type pass.
+4. Combining the pass type and weekday(Fig 14), annual pass holders trip duration pattern doesn't change much, Point 1. still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 1-minute maintenance seems to be the most common turn around time. 6-8 minutes trip duration seems to still be the most common for semester type pass.
 
 ### Checkout Station
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig15: Checkout Station Count", fig.align = "center"}
@@ -319,9 +321,9 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
 
 3. Analyzing the checkout stations by the pass type(Fig17), 15th & Pearl is still the most popular checkout station for all pass types except for the semester pass type. For the 24-hour pass type, 11th and Pearl is the 2nd most popular checkout station followed by 19th @ Broadway. The village seems to be the 2nd most popular station for the 7-day pass type. The distribution for Annual pass type doesn't change much with the overall pattern noted in point 1 because this is the most popular pass type.
 
-4. One thing to be noted are the spikes in maintenance(Fig16 & Fig17) in locations like The Village and 26th @ Pearl which are not in line with the overall checkout station popularity pattern. This might indicate that the bikes there might have been subject to more rough use or a batch of bikes which were stationed there had some defect. 
+4. One thing to be noted are the spikes in maintenance(Fig16 & Fig17) in locations like The Village and 26th @ Pearl which are not in line with the overall checkout station popularity pattern. This might indicate that the bikes at those statiopns might have been subject to more rough use or a batch of bikes had a few defects. 
 
-5. Faceting the trip duration(Fig18) by Checkout station there are not any major surprises and the overall pattern across the popular stations seems to be still true, ride times being in the 6-10 minutes range. 
+5. Faceting the trip duration(Fig18) by Checkout station there are not any major surprises and the overall pattern across the popular stations seems to be still true, ride times were in the 6-10 minutes range. 
 
 ### Return Station
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig19: Return Station Count seperated by Pass Type", fig.align = "center"}
@@ -414,15 +416,15 @@ ggplot(dataset, aes(Checkout.Date)) +
   ylab("Count")
 ```
 
-1. The number of checkouts has progressively increased over the years from year to year(Fig23). There is definitly a pattern in terms of usage, the summer(May-August) months seeing an increase in checkouts with a dip on on either side of the summer months. This definitely makes sense as people tend to ride less in the winter months. Among the popular summer months, July-August have the biggest checkouts across the years
+1. The number of checkouts has progressively increased over the years from 2013 to 2016(Fig23). There is definitly a pattern in terms of usage, the summer(May-August) months seeing an increase in checkouts with a dip on on either side of the summer months. This definitely makes sense as people tend to ride less in the winter months. Among the popular summer months, July-August have the biggest checkouts across the years
 
 2. Viewing the plots by the type of the pass(Fig24), we can see that all pass types have seen an increase in usage since Boulder B-cycle was introduced. 7-day pass saw a big increase in the summer of 2015 and the Semester type pass also saw a big increase since it was introduced in early 2014. 
 
-3. Among the annual pass holders, October of 2015(Fig24) had more users than any other month in the warmer months. This is surprising, I guess October must have been warm or there must have been a lot of events in the Boulder area.  
+3. Among the annual pass holders, October of 2015(Fig24) had more users than any other month in the warmer months. This is surprising, I guess October must have been warm or there must have been a lot of events in the Boulder area that month.  
 
-4. Maintenance generally follows the trend of an increase in the number of instances of maintenance in the summer months and a decrease in the colder months. One anamoly was that April of 2015 had the highest instances of maintenance for that year but it wasn't the most popular month in terms of ridership. This might indicate that the Boulder B-cycle organization was preparing in advance for the popular ridership summer months. This might be a good guess because the maintenance was lower in the months following April for 2015 across all pass types.
+4. Maintenance generally follows the trend of an increase in the number of instances of maintenance in the summer months and a decrease in the colder months. One anomaly was that April of 2015 had the highest instances of maintenance for that year but it wasn't the most popular month in terms of ridership. This might indicate that Boulder B-cycle was preparing in advance for the popular ridership summer months. This might be a good guess because the maintenance was lower in the months following April for 2015 across all pass types.
 
-5. Analysing checkouts divided by the day of the week(Fig25). Only Tue-Wed deviate from the general trend that August is the most popular month followed by July. In the case of Tue-Wed the roles get reversed. 
+5. Analysing checkouts divided by the day of the week(Fig25). Only Tue-Wed deviate from the general trend that August is the most popular month followed by July. In the case of Tue-Wed the roles of July and August get reversed. 
 
 6. Doing a multivariate analysis(Fig26) we can see finer trends in popular days across months and across pass types but there are no new points(other than the ones already documented) to be noted down.
 
@@ -469,9 +471,9 @@ ggplot(dataset, aes(Return.Time)) +
   ylab("Count")
 ```
 
-1. Checkout/Return times start slowly a little before 7(Fig27), followed by a big increase just after 7:00. From that time on, the checkouts/returns slightly decrease but then increase again from 10:00 to 11:15, then seeing a dip again at around 13:00 followed by an increase till 15:00. There is a dip again followed by an increase in ridership after 18:00.
+1. Checkout/Return start slowly a little before 7(Fig27), followed by a big increase just after 7:00. From that time on, the checkouts/returns slightly decrease but then increase again from 10:00 to 11:15, then seeing a dip again at around 13:00 followed by an increase till 15:00. There is a dip again followed by an increase in ridership after 18:00.
 
-2. The return and checkout times follow each other closely because the overall most popular times in Boulder is less than 10 minutes.
+2. The return and checkout times follow each other closely because the overall the most popular riding time in Boulder is less than 10 minutes.
 
 3. 24 hour pass type holders checkout/return times(Fig29/30) start off strong in the morning and slowly decrease except for one spike at 10:00 and then starts increasing at around 14:30, hitting a peak at 18:00 and then slowly decreasing.
 
@@ -530,7 +532,7 @@ ggplot(dataset, aes(Return.Time)) +
 
 2. 7-day pass checkout/returns(Fig31/32) peak at around 15:00 from Mon-Thu, with Fri-Sun seeing peaks and drops throughout the day. The same pattern applies for semester pass holders. 
 
-3. Annual pass holders like to use the service around the 11:00, 15:00 and 18:00 time periods on weekdays. Where as on Saturdays and Sundays the peak usage in the morning and evenings
+3. Annual pass holders like to use the service around the 11:00, 15:00 and 18:00 on weekdays. Where as on Saturdays and Sundays the peak usage in the morning and evenings.
 
 4. Maintenance peaks at 15:00 on weekdays and mornings/evenings on Saturdays and Sunday(with a big drop in maintenance in the middle)
 
@@ -582,52 +584,68 @@ ggmap(map) +
   guides(fill = FALSE)
 ```
 
-The size of the circle represents the overall checkouts/returns since B-cycle started. From the two maps(Fig35 & Fig36) it is clear that the stations in downtown are most frequently used. The stations near downtown and in/near the University are behind the downtown stations in terms of usage.
+The size of the circle represents the overall number checkouts/returns per station since B-cycle started. From the two maps(Fig35 & Fig36) it is clear that the stations in downtown are most frequently used. The stations near downtown and in/near the University are behind the downtown stations in terms of usage.
 
 # __3. Machine Learning to predict the Pass Type__
 ```{r, warning = FALSE}
-if(FALSE)
-{
-  # Subset the data keeping the necessary variables
-  mlsubset <- dataset[c(3, 13)]
-  
-  # Create partition
-  trainIndex <- createDataPartition(mlsubset$Entry.Pass.Type, p = 0.8, list = FALSE, times = 1)
-  trainingset <- mlsubset[trainIndex, ]
-  testset <- mlsubset[-trainIndex, ]
-  
-  # Get the necessary variables for analysis
-  # Split the data set for 10-fold cross validation, train on 9, test on 1 for all combinations
-  trainControl <- trainControl(method = "cv", number = 10)
-  metric <- "Accuracy"
-  
-  # Evaluate 3 different algorithms, make sure the same seed is used
-  # Linear Discriminant Analysis
-  set.seed(7)
-  fit.lda <- train(Entry.Pass.Type~., data = trainingset, method = "lda", 
-                   metric = metric, trControl = trainControl)
-  # Classification and Regression Test
-  set.seed(7)
-  fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart", 
-                    metric = metric, trControl = trainControl)
-  # Naive Bayes
-  set.seed(7)
-  fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
+# Subset the data keeping the necessary variables
+mlsubset <- dataset[c(3, 13)]
+
+# Create partition
+trainIndex <- createDataPartition(mlsubset$Entry.Pass.Type, p = 0.8, list = FALSE, times = 1)
+trainingset <- mlsubset[trainIndex, ]
+testset <- mlsubset[-trainIndex, ]
+
+# Get the necessary variables for analysis
+# Split the data set for 10-fold cross validation, train on 9, test on 1 for all combinations
+trainControl <- trainControl(method = "cv", number = 10)
+metric <- "Accuracy"
+
+# Evaluate 3 different algorithms, make sure the same seed is used
+# Linear Discriminant Analysis
+set.seed(7)
+fit.lda <- train(Entry.Pass.Type~., data = trainingset, method = "lda", 
+                 metric = metric, trControl = trainControl)
+# Classification and Regression Tree
+set.seed(7)
+fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart", 
                   metric = metric, trControl = trainControl)
-  
-  # Summarize accuracy of models
-  results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb))
-  summary(results)
-  
-  # Dot plot of the results
-  dotplot(results)
-  
-  # Compare against the test set
-  predictions <- predict(fit.cart, testset)
-  confusionMatrix(predictions, testset$Entry.Pass.Type)
-}
+# Naive Bayes
+set.seed(7)
+fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
+                metric = metric, trControl = trainControl)
+
+# Summarize accuracy of models
+results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb))
+summary(results)
+
+# Dot plot of the results
+dotplot(results)
+
+# Compare against the test set
+predictions <- predict(fit.cart, testset)
+confusionMatrix(predictions, testset$Entry.Pass.Type)
 ```
 
-This section explored whether it was possible to use Machine Learning algorithms on the numeric data(trip duration) to predict the pass type with a high accuracy. Three algorithms were tested(LDA, CART and Naive Bayes). Among the 3 CART had the best results but the accuracy was still low <70%. Since trip duration was the only quantified numeric data the algorithms didn't perform that well. 
+This section explored whether it was possible to use Machine Learning algorithms on the numeric data(trip duration) to predict the pass type with a high accuracy. Three algorithms were tested(LDA, CART and Naive Bayes). Among the 3, CART(or better known as Decision Tree) had the best results but the accuracy was still low <65%. Since trip duration was the only quantified numeric data the algorithms didn't perform that well. 
 
 If there was another numeric variable which Boulder B-cycle had provided, may be the distance covered during each trip, it would have probably helped with the classification and accuracy of  classification.
+
+# __Conclusion__
+There were a lot of observations made in this document, listed here are the major finds from the dataset.
+
+* Annual Pass is the most used pass type on weekdays and 24 hour pass type on weekends.
+
+* Overall Friday is the most popular day for ridership. 
+
+* 4-6 Minutes is the most common trip duration on weekdays and 10-12 minutes on weekends. Maintenance rides are usually quick(1-2 minutes)
+
+* Downtown Stations are most frequently used in Boulder, followed by the stations in/near CU Boulder and near downtown. 
+
+* The summer months are most popular for usage(October of 2015 was an anomaly). The winter months see considerable lower usage. 
+
+* Boulder B-cycle usage saw a growth in Boulder since 2013, with 2016 seeing a big increase in usage. 
+
+* The Checkout/Return times are like a sine wave, seeing peaks and troughs in usage throughout the day on weekdays. On weekends peak usage is in the mornings and evenings with a dip in the middle of the day.  
+
+* Machine Learning Algorithm accuracy is < 65% with Kappa < 40%, the algorithm performance can be vastly improved if other numerical data like distance covered during each trip is available.
