@@ -51,11 +51,15 @@ summary(dataset)
 # Convert from character string into a time/date object
 dataset$Checkout.Date <- strptime(dataset$Checkout.Date, "%m/%d/%Y")
 dataset$Return.Date <- strptime(dataset$Return.Date, "%m/%d/%Y")
-dataset$Checkout.Time <- strptime(dataset$Checkout.Time, format = "%H:%M:%S")
-dataset$Return.Time <- strptime(dataset$Return.Time, format = "%H:%M:%S")
+dataset$Checkout.Time <- strptime(dataset$Checkout.Time, "%I:%M:%S %p")
+dataset$Return.Time <- strptime(dataset$Return.Time, "%I:%M:%S %p")
 
 # Convert the Day of the Week into an ordered variable
 dataset$Checkout.Day.of.Week <- ordered(dataset$Checkout.Day.of.Week, 
+                                        levels = c("Sunday", "Monday", "Tuesday", 
+                                                   "Wednesday", "Thursday", "Friday",
+                                                   "Saturday"))
+dataset$Return.Day.of.Week <- ordered(dataset$Return.Day.of.Week, 
                                         levels = c("Sunday", "Monday", "Tuesday", 
                                                    "Wednesday", "Thursday", "Friday",
                                                    "Saturday"))
@@ -189,15 +193,17 @@ ggplot(dataset, aes(Checkout.Day.of.Week)) + geom_bar(aes(fill = Entry.Pass.Type
   ylab("Count")
 ```
 
+NOTE: This section only uses Checkout.Day.Of.Week for analysis as the points below are the same
+
 1. Friday overall is the most popular day of the week for ridership, followed by Thursday(surprising) and then Saturday. Monday, Tuesday & Wednesday usage is very close, whereas Sunday usage is markedly lower compared to other days(Fig8)
 
 2. When looking at the data faceted by the pass type(Fig9), Annual pass holders like to use their passes on weekdays(the distribution is almost gaussian like). It is completely opposite for the users of 24-hour pass type, they like riding on weekends(as it was noted in the Pass Type section)
 
-3. Maintenance rides are common on weekdays. 
+3. Maintenance rides are common on weekdays with Thursday seeing the most maintenance instead of Friday(considering point 1). 
 
 4. Semester pass holders like to use their pass on the weekdays with Tuesday being the most popular. 
 
-5. In the case of 7-day pass, there is no visible trend but Thursday is most popular followed by Friday & Saturday.
+5. In the case of 7-day pass, there is no visible trend but Thursday is most popular.
 
 ### Trip Duration
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig10:Box plots of Trip Duration", fig.align = "center"}
@@ -432,8 +438,9 @@ ggplot(dataset, aes(Checkout.Date)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig27: Checkout Time Distribution", fig.align = "center"}
 # Bar plot of checkout time 
 ggplot(dataset, aes(Checkout.Time)) + 
-  geom_histogram(color = "white", bins = 50) +
+  geom_histogram(color = "white", bins = 48) +
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Time") +
   ylab("Count")
@@ -442,8 +449,9 @@ ggplot(dataset, aes(Checkout.Time)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig28: Return Time Distribution", fig.align = "center"}
 # Bar plot of return time
 ggplot(dataset, aes(Return.Time)) + 
-  geom_histogram(color = "white", bins = 50) +
+  geom_histogram(color = "white", bins = 48) +
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Return Time") +
   ylab("Count")
@@ -452,9 +460,10 @@ ggplot(dataset, aes(Return.Time)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig29: Checkout Time Distribution seperated by Pass Type", fig.align = "center"}
 # Bar plot of checkout time faceted by pass type 
 ggplot(dataset, aes(Checkout.Time)) + 
-  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 50) +
+  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 48) +
   facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") +
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Time") +
   ylab("Count")
@@ -463,29 +472,30 @@ ggplot(dataset, aes(Checkout.Time)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig30: Return Time Distribution seperated by Pass Type", fig.align = "center"}
 # Bar plot of return time faceted by pass type 
 ggplot(dataset, aes(Return.Time)) + 
-  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 50) +
+  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 48) +
   facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") +
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Return Time") +
   ylab("Count")
 ```
 
-1. Checkout/Return start slowly a little before 7(Fig27), followed by a big increase just after 7:00. From that time on, the checkouts/returns slightly decrease but then increase again from 10:00 to 11:15, then seeing a dip again at around 13:00 followed by an increase till 15:00. There is a dip again followed by an increase in ridership after 18:00.
+1. Overall(Fig27/28) 19:00 is the most popular time for riding B-cycles, this might indicate that people like to use the service to grab dinner in Boulder. Other popular times are 18:30, 19:30, 20:00 and surprisingly 23:30! There are some rides early in the morning with negligible usage till 11:00.
 
-2. The return and checkout times follow each other closely because the overall the most popular riding time in Boulder is less than 10 minutes.
+2. Faceting the plots by pass type(Fig29/30) we can observe that there is no common pattern across pass types. Annual Pass type sees peaks and dips throughout the day, with highest peak at 23:30. This has to be one of the most surprising finds from the analysis. 
 
-3. 24 hour pass type holders checkout/return times(Fig29/30) start off strong in the morning and slowly decrease except for one spike at 10:00 and then starts increasing at around 14:30, hitting a peak at 18:00 and then slowly decreasing.
+3. 24 hour pass type has a gaussian like distribution with the peak at 20:00 and a gradual decrease on either side. 
 
-4. Among 7-day pass holders(Fig29/30) 14:30 seems to be the peak for checkout/returns. The increase in checkout/return starts at around 11:30 with the peak at 14:30 . This pattern also holds true for semester pass holders. 
+4. Maintenance is the highest between 14:30 and 23:00 with big dips on either side of that time range.
 
-5. Annual pass type usage patterns follows the overall pattern described in point 1. Whereas, for maintenance, the peak is in the morning before 11:00 followed by a big dip and then a big increase after 15:00  
+5. Semester and 7-day pass types don't have any visible patterns. Semester type pass is used the most at 15:00, whereas the 7-day pass is most used at 00:00(another surprising fact)
 
 ### Checkout/Return Time(Part 2)
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig31: Checkout Time Distribution seperated by Day of the Week", fig.align = "center"}
 # Facet by day of the week
 ggplot(dataset, aes(Checkout.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 48) +
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scale = "free_y") + 
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
   theme(axis.text.x = element_text(angle = 270)) + 
@@ -496,7 +506,7 @@ ggplot(dataset, aes(Checkout.Time)) +
 
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig32: Return Time Distribution seperated by Day of the Week", fig.align = "center"}
 ggplot(dataset, aes(Return.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 48) +
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scale = "free_y") + 
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
   theme(axis.text.x = element_text(angle = 270)) + 
@@ -508,9 +518,9 @@ ggplot(dataset, aes(Return.Time)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig33: Checkout Time Distribution seperated by Pass Type & Day of the Week", fig.align = "center"}
 # Facet by pass type and day of the week
 ggplot(dataset, aes(Checkout.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 24) +
   facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, scale = "free_y") + 
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "2 hour") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Time") +
@@ -519,22 +529,18 @@ ggplot(dataset, aes(Checkout.Time)) +
 
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig34: Return Time Distribution seperated by Pass Type & Day of the Week", fig.align = "center"}
 ggplot(dataset, aes(Return.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 24) +
   facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, scale = "free_y") + 
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "2 hour") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Return Time") +
   ylab("Count")
 ```
 
-1. Among 24 hour pass holders(Fig31/32) from Tue-Thu the checkout/return pattern is different from Fri-Mon. Tue-Thu checkout/returns doesn't dip as much in the middle of the day compared to Fri-Mon.
+1. The weekends and weekday Checkout/Return times(Fig31/32) have contrasting patterns. Weekdays sees peaks and dips throughout the day with highest peak at 23:30 for Mon-Wed-Thu and 19:00 for Tue-Fri(but both peaks are close). On weekends the distribution is gaussian like with peaks at 19:00 on Sun and 19:30 on Sat.
 
-2. 7-day pass checkout/returns(Fig31/32) peak at around 15:00 from Mon-Thu, with Fri-Sun seeing peaks and drops throughout the day. The same pattern applies for semester pass holders. 
-
-3. Annual pass holders like to use the service around the 11:00, 15:00 and 18:00 on weekdays. Where as on Saturdays and Sundays the peak usage in the morning and evenings.
-
-4. Maintenance peaks at 15:00 on weekdays and mornings/evenings on Saturdays and Sunday(with a big drop in maintenance in the middle)
+2. When doing a multivariate analysis(Fig33/34) point 1 in this section and points from the previous section all hold true and there are finer points which can be noted down. 
 
 ### Heat Map of Stations
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig35: Heat Map of Checkout Stations", fig.align = "center"}
@@ -588,8 +594,15 @@ The size of the circle represents the overall number checkouts/returns per stati
 
 # __3. Machine Learning to predict the Pass Type__
 ```{r, warning = FALSE}
+# Add new variables for Checkout.Hour and Return.Hour for machine learning analysis
+dataset$Checkout.Hour <- as.factor(substr(dataset$Checkout.Time, 12, 13))
+dataset$Return.Hour <- as.factor(substr(dataset$Return.Time, 12, 13))
+
+# Remove 'Maintenance' Pass type for classification(as this is not a user pass)
+mlsubset <- droplevels(subset(dataset, dataset$Entry.Pass.Type != 'Maintenance'))
+
 # Subset the data keeping the necessary variables
-mlsubset <- dataset[c(3, 13)]
+mlsubset <- mlsubset[c(3, 6, 8, 10, 13, 14)]
 
 # Create partition
 trainIndex <- createDataPartition(mlsubset$Entry.Pass.Type, p = 0.8, list = FALSE, times = 1)
@@ -614,6 +627,11 @@ fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart",
 set.seed(7)
 fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
                 metric = metric, trControl = trainControl)
+
+# Random Forest(Baggin Decision tree)
+set.seed(7)
+fit.rf <- train(Entry.Pass.Type~., data = trainingset, method = "rf", 
+                ntree = 100, metric = metric, trControl = trainControl)
 
 # Summarize accuracy of models
 results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb))
