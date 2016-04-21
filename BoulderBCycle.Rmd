@@ -627,21 +627,20 @@ fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart",
 set.seed(7)
 fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
                 metric = metric, trControl = trainControl)
-
-# Random Forest(Baggin Decision tree)
+# Random Forest(Bagged Decision tree)
 set.seed(7)
 fit.rf <- train(Entry.Pass.Type~., data = trainingset, method = "rf", 
                 ntree = 100, metric = metric, trControl = trainControl)
 
 # Summarize accuracy of models
-results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb))
+results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb, rf = fit.rf))
 summary(results)
 
 # Dot plot of the results
 dotplot(results)
 
 # Compare against the test set
-predictions <- predict(fit.cart, testset)
+predictions <- predict(fit.rf, testset)
 confusionMatrix(predictions, testset$Entry.Pass.Type)
 ```
 
