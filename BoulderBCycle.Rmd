@@ -2,8 +2,8 @@
 title: "Boulder B-Cycle data analysis by Monish Sunku Prabhakar"
 output:
   html_document:
-    toc: true
     theme: united
+    toc: yes
 ---
 # __Introduction__
 This project analyses Boulder B-cycle data to understand and document any patterns from 2013 to Early 2016. The data analysis in this project is through summaries and visualizations. Also part of the project was to apply Machine Learning on the numerical data to try and make predictions. 
@@ -23,6 +23,7 @@ The analysis is divided into 3 big sections:
 suppressMessages(library(ggplot2))
 suppressMessages(library(caret))
 suppressMessages(library(ggmap))
+suppressMessages(library(maboost))
 ```
 
 # __1. Summary of Data__
@@ -71,7 +72,7 @@ There are 248544 observations of 13 variables. The variables include Checkout/Re
 ### Corrections to the dataset
 There are some errors in the "Rider.Home.System" column. This data is supposed for Boulder but was set to Denver and Houston in some cases, this is not correct. Not a big issue because this variable/column data is not that important in the analysis because it's a constant and doesn't add value to the analysis.  
 
-NOTE: corrections were made to Checkout/Return Station "RTD", which is really "14th & Canyon" but was entered incorrectly as "RTD". This error was found later on in the project analysis but was corrected early on. 
+NOTE: Corrections were made to Checkout/Return Station "RTD", which is really "14th & Canyon" but was entered incorrectly as "RTD". This error was found later on in the project analysis but was corrected early on. 
 
 # __2. Data Visualizations__
 This section involves a lot of visualizations. It's a combination of univariate and multivariate plots, with the focus on one variable at a time.
@@ -275,7 +276,7 @@ This section also uses a subset of the data. There were a lot of outliers in tri
 
 3. When looking at the plots by the day of the week(Fig 13), 4-6 minute period still is the most popular on weekdays but not on weekends. With 10-12 minute seeming to be more popular, may be this is due to the fact that people are not in a hurry on the weekends.
 
-4. Combining the pass type and weekday(Fig 14), annual pass holders trip duration pattern doesn't change much, Point 1. still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 1-minute maintenance seems to be the most common turn around time. 6-8 minutes trip duration seems to still be the most common for semester type pass.
+4. Combining the pass type and weekday(Fig 14), annual pass holders trip duration pattern doesn't change much, point 1 still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 1-minute maintenance seems to be the most common turn around time. 6-8 minutes trip duration seems to still be the most common for semester type pass.
 
 ### Checkout Station
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig15: Checkout Station Count", fig.align = "center"}
@@ -325,11 +326,11 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
 
 2. Faceting it by the day of the week(Fig16), 15th & Pearl is still the most popular checkout station. With 13th and Spruce along with Municipal building being the 2nd most popular checkout stations from Mon-Thu and 11th & Pearl from Fri-Sun. 
 
-3. Analyzing the checkout stations by the pass type(Fig17), 15th & Pearl is still the most popular checkout station for all pass types except for the semester pass type. For the 24-hour pass type, 11th and Pearl is the 2nd most popular checkout station followed by 19th @ Broadway. The village seems to be the 2nd most popular station for the 7-day pass type. The distribution for Annual pass type doesn't change much with the overall pattern noted in point 1 because this is the most popular pass type.
+3. Analyzing the checkout stations by the pass type(Fig17), 15th & Pearl is still the most popular checkout station for all pass types except for the semester pass type. For the 24-hour pass type, 11th and Pearl is the 2nd most popular checkout station followed by 19th @ Broadway. The Village seems to be the 2nd most popular station for the 7-day pass type. The distribution for Annual pass type doesn't change as similar to the overall pattern, since this is the most used pass. 
 
-4. One thing to be noted are the spikes in maintenance(Fig16 & Fig17) in locations like The Village and 26th @ Pearl which are not in line with the overall checkout station popularity pattern. This might indicate that the bikes at those statiopns might have been subject to more rough use or a batch of bikes had a few defects. 
+4. One thing to be noted are the spikes in maintenance(Fig16 & Fig17) in locations like The Village and 26th @ Pearl which are not in line with the overall checkout station popularity pattern. This might indicate that the bikes at those stations might have been subject to more rough use or a batch of bikes had a few defects. 
 
-5. Faceting the trip duration(Fig18) by Checkout station there are not any major surprises and the overall pattern across the popular stations seems to be still true, ride times were in the 6-10 minutes range. 
+5. Faceting the trip duration(Fig18) by Checkout station there are not any major surprises, ride times were in the 6-10 minutes range, and the overall pattern across the popular stations is the same.
 
 ### Return Station
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig19: Return Station Count seperated by Pass Type", fig.align = "center"}
@@ -375,7 +376,7 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
   ylab("Count")
 ```
 
-No surprises from the Return Station analysis, most if not all of the points from the pervious section apply here as well. 
+No surprises from the Return Station analysis, most, if not all of the points from the pervious section apply to this section as well. 
 
 ### Checkout Date
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig23: Checkout Date Distribution", fig.align = "center"}
@@ -426,7 +427,7 @@ ggplot(dataset, aes(Checkout.Date)) +
 
 2. Viewing the plots by the type of the pass(Fig24), we can see that all pass types have seen an increase in usage since Boulder B-cycle was introduced. 7-day pass saw a big increase in the summer of 2015 and the Semester type pass also saw a big increase since it was introduced in early 2014. 
 
-3. Among the annual pass holders, October of 2015(Fig24) had more users than any other month in the warmer months. This is surprising, I guess October must have been warm or there must have been a lot of events in the Boulder area that month.  
+3. Among the annual pass holders, October of 2015(Fig24) had more users than any other month in the warmer months. This is surprising, I guess October must have been warm or may be there were a lot of events in Boulder that month. 
 
 4. Maintenance generally follows the trend of an increase in the number of instances of maintenance in the summer months and a decrease in the colder months. One anomaly was that April of 2015 had the highest instances of maintenance for that year but it wasn't the most popular month in terms of ridership. This might indicate that Boulder B-cycle was preparing in advance for the popular ridership summer months. This might be a good guess because the maintenance was lower in the months following April for 2015 across all pass types.
 
@@ -489,7 +490,7 @@ ggplot(dataset, aes(Return.Time)) +
 
 4. Maintenance is the highest between 14:30 and 23:00 with big dips on either side of that time range.
 
-5. Semester and 7-day pass types don't have any visible patterns. Semester type pass is used the most at 15:00, whereas the 7-day pass is most used at 00:00(another surprising fact)
+5. Semester and 7-day pass types don't have any visible patterns. Semester type pass is used the most at 15:00, whereas the 7-day pass is most used at 00:00(another surprising find)
 
 ### Checkout/Return Time(Part 2)
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig31: Checkout Time Distribution seperated by Day of the Week", fig.align = "center"}
@@ -530,7 +531,7 @@ ggplot(dataset, aes(Checkout.Time)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig34: Return Time Distribution seperated by Pass Type & Day of the Week", fig.align = "center"}
 ggplot(dataset, aes(Return.Time)) + 
   geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 24) +
-  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, scale = "free_y") + 
+  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, scale = "free_y", ncol = 7) + 
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
@@ -594,57 +595,61 @@ The size of the circle represents the overall number checkouts/returns per stati
 
 # __3. Machine Learning to predict the Pass Type__
 ```{r, warning = FALSE}
-# Add new variables for Checkout.Hour and Return.Hour for machine learning analysis
-dataset$Checkout.Hour <- as.factor(substr(dataset$Checkout.Time, 12, 13))
-dataset$Return.Hour <- as.factor(substr(dataset$Return.Time, 12, 13))
-
-# Remove 'Maintenance' Pass type for classification(as this is not a user pass)
-mlsubset <- droplevels(subset(dataset, dataset$Entry.Pass.Type != 'Maintenance'))
-
-# Subset the data keeping the necessary variables
-mlsubset <- mlsubset[c(3, 6, 8, 10, 13, 14)]
-
-# Create partition
-trainIndex <- createDataPartition(mlsubset$Entry.Pass.Type, p = 0.8, list = FALSE, times = 1)
-trainingset <- mlsubset[trainIndex, ]
-testset <- mlsubset[-trainIndex, ]
-
-# Get the necessary variables for analysis
-# Split the data set for 10-fold cross validation, train on 9, test on 1 for all combinations
-trainControl <- trainControl(method = "cv", number = 10)
-metric <- "Accuracy"
-
-# Evaluate 3 different algorithms, make sure the same seed is used
-# Linear Discriminant Analysis
-set.seed(7)
-fit.lda <- train(Entry.Pass.Type~., data = trainingset, method = "lda", 
-                 metric = metric, trControl = trainControl)
-# Classification and Regression Tree
-set.seed(7)
-fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart", 
+# Set this condition to TRUE to run the machine learning section, this has been disabled intentionally to speed up the knitHTML process
+if(FALSE)
+{
+  # Add new variables for Checkout.Hour and Return.Hour for machine learning analysis
+  dataset$Checkout.Hour <- as.factor(substr(dataset$Checkout.Time, 12, 13))
+  dataset$Return.Hour <- as.factor(substr(dataset$Return.Time, 12, 13))
+  
+  # Remove 'Maintenance' Pass type for classification(as this is not a user pass)
+  mlsubset <- droplevels(subset(dataset, dataset$Entry.Pass.Type != 'Maintenance'))
+  
+  # Subset the data keeping the necessary variables
+  mlsubset <- mlsubset[c(3, 4, 6, 8, 10, 13, 14)]
+  
+  # Create partition
+  trainIndex <- createDataPartition(mlsubset$Entry.Pass.Type, p = 0.8, list = FALSE, times = 1)
+  trainingset <- mlsubset[trainIndex, ]
+  testset <- mlsubset[-trainIndex, ]
+  
+  # Get the necessary variables for analysis
+  # Split the data set for 10-fold cross validation, train on 9, test on 1 for all combinations
+  trainControl <- trainControl(method = "cv", number = 10)
+  metric <- "Accuracy"
+  
+  # Evaluate 4 different algorithms, make sure the same seed is used
+  # Linear Discriminant Analysis
+  set.seed(7)
+  fit.lda <- train(Entry.Pass.Type~., data = trainingset, method = "lda", 
+                   metric = metric, trControl = trainControl)
+  # Classification and Regression Tree
+  set.seed(7)
+  fit.cart <- train(Entry.Pass.Type~., data = trainingset, method = "rpart", 
+                    metric = metric, trControl = trainControl)
+  # Naive Bayes
+  set.seed(7)
+  fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
                   metric = metric, trControl = trainControl)
-# Naive Bayes
-set.seed(7)
-fit.nb <- train(Entry.Pass.Type~., data = trainingset, method = "nb", 
-                metric = metric, trControl = trainControl)
-# Random Forest(Bagged Decision tree)
-set.seed(7)
-fit.rf <- train(Entry.Pass.Type~., data = trainingset, method = "rf", 
-                ntree = 100, metric = metric, trControl = trainControl)
-
-# Summarize accuracy of models
-results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb, rf = fit.rf))
-summary(results)
-
-# Dot plot of the results
-dotplot(results)
-
-# Compare against the test set
-predictions <- predict(fit.rf, testset)
-confusionMatrix(predictions, testset$Entry.Pass.Type)
+  # Random Forest(Bagged Decision tree)
+  set.seed(7)
+  fit.rf <- train(Entry.Pass.Type~., data = trainingset, method = "rf", 
+                  ntree = 100, metric = metric, trControl = trainControl)
+  
+  # Summarize accuracy of models
+  results <- resamples(list(lda = fit.lda, cart = fit.cart, nb = fit.nb, rf = fit.rf))
+  summary(results)
+  
+  # Dot plot of the results
+  dotplot(results)
+  
+  # Compare against the test set
+  predictions <- predict(fit.rf, testset)
+  confusionMatrix(predictions, testset$Entry.Pass.Type)
+}
 ```
 
-This section explored whether it was possible to use Machine Learning algorithms on the numeric data(trip duration) to predict the pass type with a high accuracy. Three algorithms were tested(LDA, CART and Naive Bayes). Among the 3, CART(or better known as Decision Tree) had the best results but the accuracy was still low <65%. Since trip duration was the only quantified numeric data the algorithms didn't perform that well. 
+This section explored whether it was possible to use Machine Learning algorithms on the numeric data(trip duration) to predict the pass type with a high accuracy. Four algorithms were tested(LDA, CART, Naive Bayes & Random Forest). Among the 4, Random Forest had the best results but the accuracy was still low <75%. Since trip duration and the derived Checkout/Return hour variables were the only numeric data the algorithms didn't perform with a high accuracy even after removal of 'Maintenance' pass type data.
 
 If there was another numeric variable which Boulder B-cycle had provided, may be the distance covered during each trip, it would have probably helped with the classification and accuracy of  classification.
 
@@ -663,6 +668,6 @@ There were a lot of observations made in this document, listed here are the majo
 
 * Boulder B-cycle usage saw a growth in Boulder since 2013, with 2016 seeing a big increase in usage. 
 
-* The Checkout/Return times are like a sine wave, seeing peaks and troughs in usage throughout the day on weekdays. On weekends peak usage is in the mornings and evenings with a dip in the middle of the day.  
+* The Checkout/Return times threw a surprise, with 23:30 with having the highest number of Checkouts/Returns among Annual and 7-day pass type holders.
 
-* Machine Learning Algorithm accuracy is < 65% with Kappa < 40%, the algorithm performance can be vastly improved if other numerical data like distance covered during each trip is available.
+* Machine Learning Algorithm(Random Forest) accuracy is < 75% with Kappa < 45%, the algorithm performance can be improved if other numerical data like distance covered during each trip is available.
