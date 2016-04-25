@@ -670,4 +670,4 @@ There were a lot of observations made in this document, listed here are the majo
 
 * The Checkout/Return times threw a surprise, with 23:30 with having the highest number of Checkouts/Returns among Annual and 7-day pass type holders.
 
-* Machine Learning Algorithm(Random Forest) accuracy is < 75% with Kappa < 45%, the algorithm performance can be improved if other numerical data like distance covered during each trip is available.
+* Machine Learning Algorithm(Random Forest) accuracy is < 75% with Kappa < 50%, the algorithm performance can be improved if other numerical data like distance covered during each trip is available.
