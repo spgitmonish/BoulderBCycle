@@ -9,7 +9,7 @@ output:
 This project analyses Boulder B-cycle data to understand and document any patterns from 2013 to Early 2016. The data analysis in this project is through summaries and visualizations. Also part of the project was to apply Machine Learning on the numerical data to try and make predictions. 
 
 ### How is the analysis divided?
-The analysis is divided into 3 big sections:
+The analysis is divided into 4 big sections:
 
 1. Summary of Data
 
@@ -194,7 +194,7 @@ ggplot(dataset, aes(Checkout.Day.of.Week)) + geom_bar(aes(fill = Entry.Pass.Type
   ylab("Count")
 ```
 
-NOTE: This section only uses Checkout.Day.Of.Week for analysis as the points below are the same
+NOTE: This section only uses Checkout.Day.Of.Week for analysis as the points below are mostly the same for Return.Day.Of.Week
 
 1. Friday overall is the most popular day of the week for ridership, followed by Thursday(surprising) and then Saturday. Monday, Tuesday & Wednesday usage is very close, whereas Sunday usage is markedly lower compared to other days(Fig8)
 
@@ -270,13 +270,13 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
 
 This section also uses a subset of the data. There were a lot of outliers in trip duration, so the trip duration was subset to rides within and including 60 minutes.
 
-1. Overall(Fig11), the trip duration is a gaussian distribution with the peak at 4-6 minutes and falls pretty hard and kind of stabilizes from the 32 minute mark. 
+1. Overall(Fig11), the trip duration is a gaussian distribution with the peak at 4-6 minutes and falls pretty hard from the peak and kind of stabilizes from the 32 minute mark. 
 
 2. Faceting it by pass type(Fig12), for the 24 hour pass type, the most common trip duration is 12-13 minutes, 10-13 minutes for 7-day pass, 4-6 minutes for Annual, 1 minute for Maintenance(quick maintenance rides!) and 6-8 minutes for semester type.
 
 3. When looking at the plots by the day of the week(Fig 13), 4-6 minute period still is the most popular on weekdays but not on weekends. With 10-12 minute seeming to be more popular, may be this is due to the fact that people are not in a hurry on the weekends.
 
-4. Combining the pass type and weekday(Fig 14), annual pass holders trip duration pattern doesn't change much, point 1 still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 1-minute maintenance seems to be the most common turn around time. 6-8 minutes trip duration seems to still be the most common for semester type pass.
+4. Combining the pass type and weekday(Fig 14), annual pass holders trip duration pattern doesn't change much, point 1 still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 1-minute maintenance seems to be the most common turn around time. 6-8 minutes trip duration is the most common for semester type pass.
 
 ### Checkout Station
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig15: Checkout Station Count", fig.align = "center"}
@@ -423,7 +423,7 @@ ggplot(dataset, aes(Checkout.Date)) +
   ylab("Count")
 ```
 
-1. The number of checkouts has progressively increased over the years from 2013 to 2016(Fig23). There is definitly a pattern in terms of usage, the summer(May-August) months seeing an increase in checkouts with a dip on on either side of the summer months. This definitely makes sense as people tend to ride less in the winter months. Among the popular summer months, July-August have the biggest checkouts across the years
+1. The number of checkouts has progressively increased over the years from 2013 to 2016(Fig23). There is a pattern in terms of usage, the summer(May-August) months seeing an increase in checkouts with a dip on on either side of the summer months. This definitely makes sense as people tend to ride less in the winter months. Among the popular summer months, July-August have the biggest checkouts across the years
 
 2. Viewing the plots by the type of the pass(Fig24), we can see that all pass types have seen an increase in usage since Boulder B-cycle was introduced. 7-day pass saw a big increase in the summer of 2015 and the Semester type pass also saw a big increase since it was introduced in early 2014. 
 
