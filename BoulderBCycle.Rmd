@@ -425,7 +425,7 @@ ggplot(dataset, aes(Checkout.Date)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 12, fig.height = 10, fig.cap = "Fig26: Checkout Date Distribution seperated by Pass Type and Day of the Week", fig.align = "center"}
 # Facet by pass type and day of the week
 ggplot(dataset, aes(Checkout.Date)) + 
-  geom_histogram(aes(fill = Entry.Pass.Type), bins = 50) +
+  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 50) +
   facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scale = "free_y") + 
   scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "4 months") + 
   theme(axis.text.x = element_text(angle = 90)) + 
