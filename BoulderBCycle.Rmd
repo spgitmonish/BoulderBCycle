@@ -6,7 +6,7 @@ output:
     toc: yes
 ---
 # __Introduction__
-This project analyses Boulder B-cycle data to understand and document any patterns from 2013 to Early 2016. The data analysis in this project is through summaries and visualizations. Also part of the project was to apply Machine Learning on the numerical data to try and make predictions. 
+This project analyses Boulder B-cycle data to understand and document any patterns from 2013 to Early 2016. The data analysis in this project is presented through summaries and visualizations. Also, part of the project was to apply Machine Learning on the numerical data to try and make predictions. 
 
 ### How is the analysis divided?
 The analysis is divided into 4 big sections:
@@ -23,10 +23,13 @@ The analysis is divided into 4 big sections:
 suppressMessages(library(ggplot2))
 suppressMessages(library(caret))
 suppressMessages(library(ggmap))
-suppressMessages(library(maboost))
 ```
 
 # __1. Summary of Data__
+
+### The structure of the dataset
+There are 13 variables with 248544 observations. The variables include Checkout/Return Stations, Checkout/Return Time, Type of Pass, Day of the Week, Trip Duration, Bike Number and Rider/Operator number etc. Also included is a location dataset with latitude and longitude information along with other information about the Checkout/Return stations
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10}
 # Load the dataset 
 dataset <- read.csv("Boulder Data.csv", header = TRUE)
@@ -66,11 +69,8 @@ dataset$Return.Day.of.Week <- ordered(dataset$Return.Day.of.Week,
                                                    "Saturday"))
 ```
 
-### The structure of the dataset
-There are 248544 observations of 13 variables. The variables include Checkout/Return Stations, Checkout/Return Time, Type of Pass, Day of the Week, Trip Duration, Bike Number and Rider/Operator number. Also included is a location dataset with latitude and longitude information along with other information about the Checkout/Return stations
-
 ### Corrections to the dataset
-There are some errors in the "Rider.Home.System" column. This data is supposed for Boulder but was set to Denver and Houston in some cases, this is not correct. Not a big issue because this variable/column data is not that important in the analysis because it's a constant and doesn't add value to the analysis.  
+There are some errors in the "Rider.Home.System" column. This data is supposed to be for Boulder but was set to Denver and Houston in some cases, this is not correct. Not a big issue because this variable/column data is not that important in the analysis because it's a constant and doesn't add value to the analysis.  
 
 NOTE: Corrections were made to Checkout/Return Station "RTD", which is really "14th & Canyon" but was entered incorrectly as "RTD". This error was found later on in the project analysis but was corrected early on. 
 
@@ -78,6 +78,10 @@ NOTE: Corrections were made to Checkout/Return Station "RTD", which is really "1
 This section involves a lot of visualizations. It's a combination of univariate and multivariate plots, with the focus on one variable at a time.
 
 ### Riders or Operators
+Rider are users who use the pass and Operators are B-cycle employees who do maintenance. This section has visualizations with the 'Rider.or.Operator.Number' in focus.
+
+NOTE: There were a lot of riders with 1-200 rides, so to understand any patterns better, the data was subset to riders with 200 or more rides.
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig1: Rider/Operator Count", fig.align = "center"}
 # Bar plot of riders with more than 200 rides
 riders <- subset(dataset, 
@@ -102,15 +106,15 @@ ggplot(riders, aes(Rider.or.Operator.Number)) +
   ylab("Count")
 ```
 
-NOTE: There were a lot of riders with 1-200 rides, so to understand any patterns better, the data was subset to riders with 200 or more rides.
-
 The following trends can be noted from the plots in this section from the subset data: 
 
-1. Some riders really like to use B-cycle for their rides(Fig1). Faceting it by the pass type(Fig2), we get a better understanding of what type of passes they like to use. Annual Pass is the biggest winner among people who use the bikes often(not surprising) but there was a rider who did a little more than 200 rides using the 24 hour pass(surprised that the person didn't think of other available pass types). 
+1. Some riders really like to use B-cycle for their rides (Fig1). Faceting it by the pass type (Fig2), we get a better understanding of what type of passes they like to use. Annual Pass is the biggest winner among people who use the bikes often(not surprising) but there was a rider who did a little more than 200 rides using the 24 hour pass(surprised that the person didn't think of other available pass types). 
 
 2. The number of rides by riders using Maintenance pass is very interesting, there are a lot of rides by a few users. This indicates that these were operators who regularly used and fixed bikes.
 
 ### Pass Type
+There are four major pass types(Annual, 24-hour, 7-day and Semester) and a Maintenance pass type
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig3: Pass Type Count", fig.align = "center"}
 # Bar plot of the post popular pass type
 ggplot(dataset, aes(Entry.Pass.Type)) + 
@@ -121,7 +125,7 @@ ggplot(dataset, aes(Entry.Pass.Type)) +
   ylab("Count") 
 ```
 
-```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig4: Pass Type Count seperatred by Day of the Week", fig.align = "center"}
+```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig4: Pass Type Count separatred by Day of the Week", fig.align = "center"}
 # Bar plot of the post popular pass type faceted by day of the week
 ggplot(dataset, aes(Entry.Pass.Type)) + 
   geom_bar(aes(fill = Entry.Pass.Type)) + 
@@ -132,11 +136,17 @@ ggplot(dataset, aes(Entry.Pass.Type)) +
   ylab("Count") 
 ```
 
-1. There are 4 pass types as noted from the plot above(Fig3). It is clear that the Anuual pass is definitely the most popular, followed by the 24-hour type pass. 150-day and 7-day passes pale in comparison. Maintainance is another one which has relatively high use compared to 7-day and Semester(150-day) type.
+1. The 5 pass types can be noted from the plot above (Fig3). It is clear that the Anuual pass is definitely the most popular, followed by the 24-hour type pass. 150-day and 7-day passes pale in comparison. Maintainance is another one which has relatively high use compared to 7-day and Semester (150-day) type.
 
-2. From Fig4 one thing which stands out is that 24-hour pass type is used way more than Annual pass on the weekends. whereas on the weekdays Annual pass is still the most widely used. Semester and 7-day pass usage is comparatively very low.  
+2. From Fig4 one thing which stands out is that 24-hour pass type is used way more than Annual pass on the weekends. Whereas on the weekdays the Annual pass is still the most widely used. Semester and 7-day pass usage is comparatively very low.
+
+NOTE: The semester pass type was introduced only in 2014, so it's lower usage makes sense. 
 
 ### Bike Numbers 
+I was not expecting any trends when analyzing bike numbers, but surprisingly there are some trends.
+
+The bike ID numbers in the middle range seem to be most used for Annual, 24 hour and Maintenance pass types (this is not true for the 7-day and Semester pass types). This might be related to the stations they are at, as there are stations which are more popular than others, as we will see below. 
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig5: Bike# Count seperated by Pass Type", fig.align = "center"}
 # Subset for bikes with 100 or more rides
 bikes <- subset(dataset, 
@@ -154,7 +164,7 @@ ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Entry.Pass.Type)) +
 
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig6: Bike# Count seperated by Day of the Week", fig.align = "center"}
 # Bar Plot of the bike numbers faceted by day of the week
-ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Checkout.Day.of.Week)) + 
+ggplot(bikes, aes(Bike.Number)) + geom_bar() + 
   theme(axis.text.x = element_text(angle = 90, face = "bold", size = 6)) +
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scales = "free_y") +
   guides(fill = FALSE) +
@@ -164,7 +174,7 @@ ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Checkout.Day.of.Week)) +
 
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig7: Bike# Count seperated by Pass Type & Day of the Week", fig.align = "center"}
 # Bar Plot of the bike numbers faceted by day of the week and pass type
-ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Checkout.Day.of.Week)) + 
+ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Entry.Pass.Type)) + 
   theme(axis.text.x = element_text(angle = 90, face = "bold", size = 6)) +
   facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scales = "free_y") +
   guides(fill = FALSE) +
@@ -172,11 +182,9 @@ ggplot(bikes, aes(Bike.Number)) + geom_bar(aes(fill = Checkout.Day.of.Week)) +
   ylab("Count")
 ```
 
-Was not expecting any trends when analyzing bike numbers but surprisingly there are some trends.
-
-Except for 7-day and Semester pass types, the bike numbers in the middle seem to be most used for other pass types. This might be related to the stations they are at, as there are stations which are more popular than others, as we will see below. 
-
 ### Day of the week
+NOTE: This section only uses Checkout.Day.Of.Week for analysis as the points below are mostly the same for Return.Day.Of.Week
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig8: Day of the Week Count", fig.align = "center"}
 # Bar plot of the day of the week
 ggplot(dataset, aes(Checkout.Day.of.Week)) + geom_bar() +
@@ -194,19 +202,19 @@ ggplot(dataset, aes(Checkout.Day.of.Week)) + geom_bar(aes(fill = Entry.Pass.Type
   ylab("Count")
 ```
 
-NOTE: This section only uses Checkout.Day.Of.Week for analysis as the points below are mostly the same for Return.Day.Of.Week
+1. Friday overall is the most popular day of the week for ridership, followed by Thursday (surprising) and then Saturday. Monday, Tuesday & Wednesday usage is very close, whereas Sunday usage is markedly lower compared to other days (Fig8)
 
-1. Friday overall is the most popular day of the week for ridership, followed by Thursday(surprising) and then Saturday. Monday, Tuesday & Wednesday usage is very close, whereas Sunday usage is markedly lower compared to other days(Fig8)
+2. When looking at the data faceted by the pass type (Fig9), Annual pass holders like to use their passes on weekdays (the distribution is almost gaussian like). It is completely opposite for the users of 24-hour pass type, they like riding on weekends (as it was noted in the Pass Type section)
 
-2. When looking at the data faceted by the pass type(Fig9), Annual pass holders like to use their passes on weekdays(the distribution is almost gaussian like). It is completely opposite for the users of 24-hour pass type, they like riding on weekends(as it was noted in the Pass Type section)
-
-3. Maintenance rides are common on weekdays with Thursday seeing the most maintenance instead of Friday(considering point 1). 
+3. Maintenance rides are common on weekdays with Thursday seeing the most maintenance instead of Friday (considering point 1). 
 
 4. Semester pass holders like to use their pass on the weekdays with Tuesday being the most popular. 
 
-5. In the case of 7-day pass, there is no visible trend but Thursday is most popular.
+5. In the case of the 7-day pass, there is no visible trend but Thursday is most popular.
 
 ### Trip Duration
+This section also uses a subset of the data. There were a lot of outliers in trip duration, so the trip duration was subset to rides within and including 60 minutes.
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig10:Box plots of Trip Duration", fig.align = "center"}
 # Get a summary of Trip Duration 
 summary(dataset$Trip.Duration..Minutes.)
@@ -247,7 +255,7 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig13: Trip Duration Distribution seperated by Day of the Week", fig.align = "center"}
 # Faceted by day of the week
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 30) +
+  geom_histogram(color = "white", bins = 30) +
   scale_x_continuous(breaks = seq(0, 60, 2)) + 
   theme(axis.text.x = element_text(angle = 90)) + 
   facet_grid(~Checkout.Day.of.Week) +
@@ -259,7 +267,7 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig14: Trip Duration Distribution seperated by Pass Type and Day of the Week", fig.align = "center"}
 # Faceted by day of the week and pass type
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Checkout.Day.of.Week), bins = 30) +
+  geom_histogram(color = "white", aes(fill = Entry.Pass.Type), bins = 30) +
   scale_x_continuous(breaks = seq(0, 60, 2)) + 
   theme(axis.text.x = element_text(angle = 90)) + 
   facet_grid(Entry.Pass.Type~Checkout.Day.of.Week, scales = "free_y") +
@@ -268,17 +276,15 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
   ylab("Count")
 ```
 
-This section also uses a subset of the data. There were a lot of outliers in trip duration, so the trip duration was subset to rides within and including 60 minutes.
+1. Overall (Fig11), the trip duration is a gaussian distribution with the peak at 4-6 minutes and falls pretty hard from the peak and kind of stabilizes from the 32 minute mark. 
 
-1. Overall(Fig11), the trip duration is a gaussian distribution with the peak at 4-6 minutes and falls pretty hard from the peak and kind of stabilizes from the 32 minute mark. 
+2. Faceting it by pass type (Fig12), for the 24 hour pass type, the most common trip duration is 12-13 minutes, 10-13 minutes for 7-day pass, 4-6 minutes for Annual, 1 minute for Maintenance (quick maintenance rides!) and 6-8 minutes for semester type.
 
-2. Faceting it by pass type(Fig12), for the 24 hour pass type, the most common trip duration is 12-13 minutes, 10-13 minutes for 7-day pass, 4-6 minutes for Annual, 1 minute for Maintenance(quick maintenance rides!) and 6-8 minutes for semester type.
+3. When looking at the plots by the day of the week (Fig 13), 4-6 minute period still is the most popular on weekdays but not on weekends. With 10-12 minute trip duration seeming to be more popular, maybe this is due to the fact that people are not in a hurry on the weekends.
 
-3. When looking at the plots by the day of the week(Fig 13), 4-6 minute period still is the most popular on weekdays but not on weekends. With 10-12 minute seeming to be more popular, may be this is due to the fact that people are not in a hurry on the weekends.
+4. Combining the pass type and weekday (Fig 14), annual pass holders' trip duration pattern doesn't change much, point 1 still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 1-minute maintenance seems to be the most common turn around time. 6-8 minutes trip duration is the most common for semester type pass.
 
-4. Combining the pass type and weekday(Fig 14), annual pass holders trip duration pattern doesn't change much, point 1 still holds true. For 24 hour pass type, the trip duration seems to be in the upper ranges, 10+ minutes. The 7-day pass type trip duration doesn't show a clear pattern from the plots. 1-minute maintenance seems to be the most common turn around time. 6-8 minutes trip duration is the most common for semester type pass.
-
-### Checkout Station
+### Checkout Station  
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig15: Checkout Station Count", fig.align = "center"}
 # Bar plot of the checkout station
 ggplot(dataset, aes(Checkout.Station)) + 
@@ -292,7 +298,7 @@ ggplot(dataset, aes(Checkout.Station)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig16: Checkout Station Count seperated by Day of the Week", fig.align = "center"}
 # Bar plot of the checkout station faceted by day of the week
 ggplot(dataset, aes(Checkout.Station)) + 
-  geom_bar(aes(fill = Checkout.Day.of.Week)) +
+  geom_bar() +
   theme(axis.text.x = element_text(angle = 270)) + 
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scales = "free_y") + 
   guides(fill = FALSE) +
@@ -314,7 +320,7 @@ ggplot(dataset, aes(Checkout.Station)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig18: Trip Duration Distribution seperated by Checkout Station", fig.align = "center"}
 # Facet Trip duration by checkout station
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Checkout.Station), bins = 30) +
+  geom_histogram(color = "white", bins = 30) +
   scale_x_continuous(breaks = seq(0, 60, 2)) + 
   facet_wrap(~Checkout.Station, ncol = 5) +
   guides(fill = FALSE) +
@@ -322,17 +328,19 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
   ylab("Count")
 ```
 
-1. 15th & Pearl, 13th and Spruce are the 2 most poular check out stations in Boulder(Fig15). There is a close tie between 11th and Pearl and Municipal Building stations. Greenhouse and Gunbarrel North are the least used stations, 14th and Walnut office might be an error as this location doesn't have lattitude, longitude listed.
+1. 15th & Pearl and 13th and Spruce are the 2 most popular check out stations in Boulder (Fig15). There is a close tie between 11th and Pearl and Municipal Building stations. Greenhouse and Gunbarrel North are the least used stations, 14th and Walnut office might be an error as this location doesn't have lattitude, longitude listed.
 
-2. Faceting it by the day of the week(Fig16), 15th & Pearl is still the most popular checkout station. With 13th and Spruce along with Municipal building being the 2nd most popular checkout stations from Mon-Thu and 11th & Pearl from Fri-Sun. 
+2. Faceting it by the day of the week (Fig16), 15th & Pearl is still the most popular checkout station. With 13th and Spruce along with Municipal building being the 2nd most popular checkout stations from Mon-Thu and 11th & Pearl from Fri-Sun. 
 
-3. Analyzing the checkout stations by the pass type(Fig17), 15th & Pearl is still the most popular checkout station for all pass types except for the semester pass type. For the 24-hour pass type, 11th and Pearl is the 2nd most popular checkout station followed by 19th @ Broadway. The Village seems to be the 2nd most popular station for the 7-day pass type. The distribution for Annual pass type doesn't change as similar to the overall pattern, since this is the most used pass. 
+3. Analyzing the checkout stations by the pass type (Fig17), 15th & Pearl is still the most popular checkout station for all pass types except for the semester pass type. For the 24-hour pass type, 11th and Pearl is the 2nd most popular checkout station followed by 19th @ Broadway. The Village seems to be the 2nd most popular station for the 7-day pass type. The distribution for Annual pass type doesn't change as similar to the overall pattern, since this is the most used pass. 
 
-4. One thing to be noted are the spikes in maintenance(Fig16 & Fig17) in locations like The Village and 26th @ Pearl which are not in line with the overall checkout station popularity pattern. This might indicate that the bikes at those stations might have been subject to more rough use or a batch of bikes had a few defects. 
+4. One thing to be noted are the spikes in maintenance (Fig16 & Fig17) in locations like The Village and 26th @ Pearl which are not in line with the overall checkout station popularity pattern. This might indicate that the bikes at those stations might have been subject to more rough use or a batch of bikes had a few defects. 
 
-5. Faceting the trip duration(Fig18) by Checkout station there are not any major surprises, ride times were in the 6-10 minutes range, and the overall pattern across the popular stations is the same.
+5. Faceting the trip duration (Fig18) by Checkout station there are not any major surprises, ride times were in the 6-10 minutes range, and the overall pattern across the popular stations is the same.
 
 ### Return Station
+No surprises from the Return Station analysis, most, if not all of the points from the pervious section apply to this section as well.
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig19: Return Station Count seperated by Pass Type", fig.align = "center"}
 # Bar plot of the return station
 ggplot(dataset, aes(Return.Station)) + 
@@ -346,7 +354,7 @@ ggplot(dataset, aes(Return.Station)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig20: Return Station Count seperated by Day of the Week", fig.align = "center"}
 # Bar plot of the return station faceted by day of the week
 ggplot(dataset, aes(Return.Station)) + 
-  geom_bar(aes(fill = Checkout.Day.of.Week)) +
+  geom_bar() +
   theme(axis.text.x = element_text(angle = 270)) + 
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scales = "free_y") + 
   guides(fill = FALSE) +
@@ -368,7 +376,7 @@ ggplot(dataset, aes(Return.Station)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig22: Trip Duration Distribution seperated by Return Station", fig.align = "center"}
 # Facet Trip duration by return station
 ggplot(duration, aes(Trip.Duration..Minutes.)) + 
-  geom_histogram(color = "white", aes(fill = Return.Station), bins = 30) +
+  geom_histogram(color = "white", bins = 30) +
   scale_x_continuous(breaks = seq(0, 60, 2)) + 
   facet_wrap(~Return.Station, ncol = 5) +
   guides(fill = FALSE) +
@@ -376,14 +384,15 @@ ggplot(duration, aes(Trip.Duration..Minutes.)) +
   ylab("Count")
 ```
 
-No surprises from the Return Station analysis, most, if not all of the points from the pervious section apply to this section as well. 
-
 ### Checkout Date
+As noted in the Pass Type section, the Semester Pass type was started only in Early 2014, the point becomes obvious as we look at the charts when faceting it by the pass type. 
+
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig23: Checkout Date Distribution", fig.align = "center"}
 # Plot histogram of checkout 
 ggplot(dataset, aes(Checkout.Date)) + 
   geom_histogram(color = "white", bins = 50) +
   scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "3 months") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Date") +
   ylab("Count")
@@ -395,6 +404,7 @@ ggplot(dataset, aes(Checkout.Date)) +
   geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 50) +
   facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") + 
   scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "3 months") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Date") +
   ylab("Count") 
@@ -403,44 +413,45 @@ ggplot(dataset, aes(Checkout.Date)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig25: Checkout Date Distribution seperated by Day of the Week", fig.align = "center"}
 # Facet it by day of the week
 ggplot(dataset, aes(Checkout.Date)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  geom_histogram(color = "white", bins = 50) +
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scale = "free_y") + 
   scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "6 months") + 
+  theme(axis.text.x = element_text(angle = 90)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Date") +
   ylab("Count")
 ```
 
-```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig26: Checkout Date Distribution seperated by Pass Type and Day of the Week", fig.align = "center"}
+```{r, warning = FALSE, echo = FALSE, fig.width = 12, fig.height = 10, fig.cap = "Fig26: Checkout Date Distribution seperated by Pass Type and Day of the Week", fig.align = "center"}
 # Facet by pass type and day of the week
 ggplot(dataset, aes(Checkout.Date)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 50) +
+  geom_histogram(aes(fill = Entry.Pass.Type), bins = 50) +
   facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, ncol = 7, scale = "free_y") + 
   scale_x_datetime(date_labels = "%Y-%m-%d", date_breaks = "4 months") + 
-  theme(axis.text.x = element_text(angle = 270)) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Date") +
   ylab("Count")
 ```
 
-1. The number of checkouts has progressively increased over the years from 2013 to 2016(Fig23). There is a pattern in terms of usage, the summer(May-August) months seeing an increase in checkouts with a dip on on either side of the summer months. This definitely makes sense as people tend to ride less in the winter months. Among the popular summer months, July-August have the biggest checkouts across the years
+1. The number of checkouts has progressively increased over the years from 2013 to 2016 (Fig23). There is a pattern in terms of usage, the summer(May-August) months seeing an increase in checkouts with a dip on on either side of the summer months. This definitely makes sense as people tend to ride less in the winter months. Among the popular summer months, July-August have the biggest checkouts across the years
 
-2. Viewing the plots by the type of the pass(Fig24), we can see that all pass types have seen an increase in usage since Boulder B-cycle was introduced. 7-day pass saw a big increase in the summer of 2015 and the Semester type pass also saw a big increase since it was introduced in early 2014. 
+2. Viewing the plots by the type of the pass (Fig24), we can see that all pass types have seen an increase in usage since Boulder B-cycle was introduced. 7-day pass saw a big increase in the summer of 2015 and the Semester type pass also saw a big increase since it was introduced in early 2014. 
 
-3. Among the annual pass holders, October of 2015(Fig24) had more users than any other month in the warmer months. This is surprising, I guess October must have been warm or may be there were a lot of events in Boulder that month. 
+3. Among the annual pass holders, October of 2015 (Fig24) had more users than any other month in the warmer months. This is surprising, I guess October must have been warm or maybe there were a lot of events in Boulder that month. 
 
-4. Maintenance generally follows the trend of an increase in the number of instances of maintenance in the summer months and a decrease in the colder months. One anomaly was that April of 2015 had the highest instances of maintenance for that year but it wasn't the most popular month in terms of ridership. This might indicate that Boulder B-cycle was preparing in advance for the popular ridership summer months. This might be a good guess because the maintenance was lower in the months following April for 2015 across all pass types.
+4. Maintenance generally follows the trend of an increase in the number of instances of maintenance in the summer months and a decrease in the colder months. One anomaly was that April of 2015 had the highest instances of maintenance for that year but it wasn't the most popular month in terms of ridership. This might indicate that Boulder B-cycle was preparing in advance for the popular summer months. This might be a good guess because the maintenance was lower in the months following April for 2015 across all pass types.
 
-5. Analysing checkouts divided by the day of the week(Fig25). Only Tue-Wed deviate from the general trend that August is the most popular month followed by July. In the case of Tue-Wed the roles of July and August get reversed. 
+5. Analysing checkouts divided by the day of the week (Fig25). Only Tue-Wed deviate from the general trend that August is the most popular month followed by July. In the case of Tue-Wed the roles of July and August get reversed. 
 
-6. Doing a multivariate analysis(Fig26) we can see finer trends in popular days across months and across pass types but there are no new points(other than the ones already documented) to be noted down.
+6. Doing a multivariate analysis (Fig26) we can see finer trends in popular days across months and across pass types but there are no new points(other than the ones already documented) to be noted down.
 
 ### Checkout/Return Time(Part 1)
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig27: Checkout Time Distribution", fig.align = "center"}
 # Bar plot of checkout time 
 ggplot(dataset, aes(Checkout.Time)) + 
   geom_histogram(color = "white", bins = 48) +
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Time") +
@@ -451,7 +462,7 @@ ggplot(dataset, aes(Checkout.Time)) +
 # Bar plot of return time
 ggplot(dataset, aes(Return.Time)) + 
   geom_histogram(color = "white", bins = 48) +
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Return Time") +
@@ -463,7 +474,7 @@ ggplot(dataset, aes(Return.Time)) +
 ggplot(dataset, aes(Checkout.Time)) + 
   geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 48) +
   facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") +
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Time") +
@@ -475,30 +486,30 @@ ggplot(dataset, aes(Checkout.Time)) +
 ggplot(dataset, aes(Return.Time)) + 
   geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 48) +
   facet_wrap(~Entry.Pass.Type, ncol = 1, scale = "free_y") +
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Return Time") +
   ylab("Count")
 ```
 
-1. Overall(Fig27/28) 19:00 is the most popular time for riding B-cycles, this might indicate that people like to use the service to grab dinner in Boulder. Other popular times are 18:30, 19:30, 20:00 and surprisingly 23:30! There are some rides early in the morning with negligible usage till 11:00.
+1. Overall (Fig27/28) 19:00 is the most popular time for riding B-cycles, this might indicate that people like to use the service to grab dinner in Boulder. Other popular times are 18:30, 19:30, 20:00 and surprisingly 23:30! There are some rides early in the morning with negligible usage till 11:00.
 
-2. Faceting the plots by pass type(Fig29/30) we can observe that there is no common pattern across pass types. Annual Pass type sees peaks and dips throughout the day, with highest peak at 23:30. This has to be one of the most surprising finds from the analysis. 
+2. Faceting the plots by pass type (Fig29/30) we can observe that there is no common pattern across pass types. Annual Pass type sees peaks and dips throughout the day, with highest peak at 23:30. This has to be one of the most surprising finds from the analysis. 
 
 3. 24 hour pass type has a gaussian like distribution with the peak at 20:00 and a gradual decrease on either side. 
 
 4. Maintenance is the highest between 14:30 and 23:00 with big dips on either side of that time range.
 
-5. Semester and 7-day pass types don't have any visible patterns. Semester type pass is used the most at 15:00, whereas the 7-day pass is most used at 00:00(another surprising find)
+5. Semester and 7-day pass types don't have any visible patterns. Semester type pass is used the most at 15:00, whereas the 7-day pass is most used at 00:00(another surprising find).
 
 ### Checkout/Return Time(Part 2)
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig31: Checkout Time Distribution seperated by Day of the Week", fig.align = "center"}
 # Facet by day of the week
 ggplot(dataset, aes(Checkout.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 48) +
+  geom_histogram(color = "white", bins = 48) +
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scale = "free_y") + 
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Checkout Time") +
@@ -507,9 +518,9 @@ ggplot(dataset, aes(Checkout.Time)) +
 
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig32: Return Time Distribution seperated by Day of the Week", fig.align = "center"}
 ggplot(dataset, aes(Return.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 48) +
+  geom_histogram(color = "white", bins = 48) +
   facet_wrap(~Checkout.Day.of.Week, ncol = 1, scale = "free_y") + 
-  scale_x_datetime(date_labels = "%H:%M", date_breaks = "30 min") + 
+  scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
   xlab("Return Time") +
@@ -519,8 +530,8 @@ ggplot(dataset, aes(Return.Time)) +
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig33: Checkout Time Distribution seperated by Pass Type & Day of the Week", fig.align = "center"}
 # Facet by pass type and day of the week
 ggplot(dataset, aes(Checkout.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 24) +
-  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, scale = "free_y") + 
+  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 24) +
+  facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, scale = "free_y", ncol = 7) + 
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
   guides(fill = FALSE) + 
@@ -530,7 +541,7 @@ ggplot(dataset, aes(Checkout.Time)) +
 
 ```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig34: Return Time Distribution seperated by Pass Type & Day of the Week", fig.align = "center"}
 ggplot(dataset, aes(Return.Time)) + 
-  geom_histogram(aes(fill = Checkout.Day.of.Week), color = "white", bins = 24) +
+  geom_histogram(aes(fill = Entry.Pass.Type), color = "white", bins = 24) +
   facet_wrap(Entry.Pass.Type~Checkout.Day.of.Week, scale = "free_y", ncol = 7) + 
   scale_x_datetime(date_labels = "%H:%M", date_breaks = "1 hour") + 
   theme(axis.text.x = element_text(angle = 270)) + 
@@ -539,12 +550,12 @@ ggplot(dataset, aes(Return.Time)) +
   ylab("Count")
 ```
 
-1. The weekends and weekday Checkout/Return times(Fig31/32) have contrasting patterns. Weekdays sees peaks and dips throughout the day with highest peak at 23:30 for Mon-Wed-Thu and 19:00 for Tue-Fri(but both peaks are close). On weekends the distribution is gaussian like with peaks at 19:00 on Sun and 19:30 on Sat.
+1. The weekends and weekday Checkout/Return times (Fig31/32) have contrasting patterns. Weekdays sees peaks and dips throughout the day with highest peak at 23:30 for Mon-Wed-Thu and 19:00 for Tue-Fri (but both peaks are close). On weekends the distribution is gaussian like with peaks at 19:00 on Sun and 19:30 on Sat.
 
-2. When doing a multivariate analysis(Fig33/34) point 1 in this section and points from the previous section all hold true and there are finer points which can be noted down. 
+2. When doing a multivariate analysis (Fig33/34) point 1 in this section and points from the previous section all hold true and there are finer points which can be noted down. 
 
 ### Heat Map of Stations
-```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig35: Heat Map of Checkout Stations", fig.align = "center"}
+```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig35: Heat Map of Checkout Stations from 2013-2016", fig.align = "center"}
 # Get the map of Boulder, CO
 map = get_map(location = "Boulder, Colorado", zoom = 13, maptype = "terrain")
 
@@ -579,7 +590,7 @@ ggmap(map) +
   guides(fill = FALSE)
 ```
 
-```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig36: Heat Map of Return Stationss", fig.align = "center"}
+```{r, warning = FALSE, echo = FALSE, fig.width = 10, fig.height = 10, fig.cap = "Fig36: Heat Map of Return Stations from 2013-2016", fig.align = "center"}
 # Heat map of the return stations
 ggmap(map) +
   geom_point(data = locationset, 
@@ -591,12 +602,12 @@ ggmap(map) +
   guides(fill = FALSE)
 ```
 
-The size of the circle represents the overall number checkouts/returns per station since B-cycle started. From the two maps(Fig35 & Fig36) it is clear that the stations in downtown are most frequently used. The stations near downtown and in/near the University are behind the downtown stations in terms of usage.
+The size of the circle represents the overall number checkouts/returns per station since B-cycle started. From the two maps (Fig35 & Fig36) it is clear that the stations in downtown are most frequently used. The stations just outside of downtown and in/near the University are second to the downtown stations in terms of usage.
 
 # __3. Machine Learning to predict the Pass Type__
 ```{r, warning = FALSE}
 # Set this condition to TRUE to run the machine learning section, this has been disabled intentionally to speed up the knitHTML process
-if(FALSE)
+if (FALSE)
 {
   # Add new variables for Checkout.Hour and Return.Hour for machine learning analysis
   dataset$Checkout.Hour <- as.factor(substr(dataset$Checkout.Time, 12, 13))
@@ -644,30 +655,30 @@ if(FALSE)
   dotplot(results)
   
   # Compare against the test set
-  predictions <- predict(fit.rf, testset)
+  predictions <- predict (Fit.rf, testset)
   confusionMatrix(predictions, testset$Entry.Pass.Type)
 }
 ```
 
-This section explored whether it was possible to use Machine Learning algorithms on the numeric data(trip duration) to predict the pass type with a high accuracy. Four algorithms were tested(LDA, CART, Naive Bayes & Random Forest). Among the 4, Random Forest had the best results but the accuracy was still low <75%. Since trip duration and the derived Checkout/Return hour variables were the only numeric data the algorithms didn't perform with a high accuracy even after removal of 'Maintenance' pass type data.
+This section explored whether it was possible to use Machine Learning algorithms on the numeric data (trip duration) to predict the pass type with a high accuracy. Four algorithms were tested (LDA, CART, Naive Bayes & Random Forest). Among the 4, Random Forest had the best results but the accuracy was still low <75%. Since trip duration and the derived Checkout/Return hour variables were the only numeric data the algorithms didn't perform with a high accuracy even after removal of 'Maintenance' pass type data.
 
-If there was another numeric variable which Boulder B-cycle had provided, may be the distance covered during each trip, it would have probably helped with the classification and accuracy of  classification.
+If there was another numeric variable which Boulder B-cycle had provided, maybe the distance covered during each trip, it would have probably helped improve the classification accuracy.
 
-# __Conclusion__
+# __4. Conclusion__
 There were a lot of observations made in this document, listed here are the major finds from the dataset.
 
-* Annual Pass is the most used pass type on weekdays and 24 hour pass type on weekends.
+* The Annual Pass is the most used pass type on weekdays and 24 hour pass type on weekends.
 
 * Overall Friday is the most popular day for ridership. 
 
-* 4-6 Minutes is the most common trip duration on weekdays and 10-12 minutes on weekends. Maintenance rides are usually quick(1-2 minutes)
+* 4-6 Minutes is the most common trip duration on weekdays and 10-12 minutes on weekends. Maintenance rides are usually quick (1-2 minutes)
 
-* Downtown Stations are most frequently used in Boulder, followed by the stations in/near CU Boulder and near downtown. 
+* Downtown Stations are most frequently used in Boulder, followed by the stations in/near CU Boulder and just outside downtown. 
 
-* The summer months are most popular for usage(October of 2015 was an anomaly). The winter months see considerable lower usage. 
+* The summer months are most popular for usage (October of 2015 was an anomaly). The winter months see considerably lower usage. 
 
 * Boulder B-cycle usage saw a growth in Boulder since 2013, with 2016 seeing a big increase in usage. 
 
 * The Checkout/Return times threw a surprise, with 23:30 with having the highest number of Checkouts/Returns among Annual and 7-day pass type holders.
 
-* Machine Learning Algorithm(Random Forest) accuracy is < 75% with Kappa < 50%, the algorithm performance can be improved if other numerical data like distance covered during each trip is available.
+* Machine Learning Algorithm (Random Forest) accuracy is < 75% with Kappa < 50%, the algorithm performance can be improved if other numerical data like distance covered during each trip is available.
